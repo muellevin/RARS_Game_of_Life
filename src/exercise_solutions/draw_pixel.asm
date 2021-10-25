@@ -18,18 +18,17 @@ draw_pixel:
 
 	#STEP 3a: Save the callee save registers on the stack
 	# ADD YOUR STEP x CODE HERE
-	addi sp, sp, -20
+	addi sp, sp, -16
 	sw s0, 0 (sp)
 	sw s1, 4 (sp)
 	sw s2, 8 (sp)
 	sw s3, 12(sp)
-	sw ra, 16(sp)
 	
 	la s3, settings
 	#STEP 1: Use the constants DISPLAY_ADDRESS and DISPLAY_WIDTH defined in cesplib_rars.asm and the arguments passed via registers a1 and a2 to calculate the memory address that you  need.
 	# ADD YOUR STEP x CODE HERE
-	lw s0, 4(s3)
-	lw s1, 16(s3)
+	lw s0, 4(s3)	# display address
+	lw s1, 12(s3)	# y size
 	
 	# y_offset
 	mul s2, s1, a2  # y∗DISPLAY_WIDTH
@@ -43,7 +42,7 @@ draw_pixel:
 	#STEP 2: Store the value of a3 in the memory at the address you have calculated before.
 	# ADD YOUR STEP x CODE HERE
 	# *crt_address = a3
-	sw a3, (s2)
+	sw a3, 0(s2)
 
 	#STEP 3b: Don't forget to restore the callee save values
 	# ADD YOUR STEP x CODE HERE
@@ -51,6 +50,5 @@ draw_pixel:
 	lw s1, 4 (sp)
 	lw s2, 8 (sp)
 	lw s3, 12(sp)
-	sw ra, 16(sp)
-	addi sp, sp, 20
+	addi sp, sp, 16
 	ret

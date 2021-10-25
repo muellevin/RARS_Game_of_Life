@@ -20,49 +20,48 @@
 # a6: unsigned integer y2 -- bottom boundary of rectangle
 # a7: unsigned integer c  -- fill color of rectangle as RGB value
 
+# li a3, 1
+#li a4, 1
+#li a5, 9
+#li a6, 10
+#li a7, 0x00ff00
 draw_rectangle:
-	#STEP x: Save all necessary values to the stack
-	# ADD YOUR STEP x CODE HERE
-
-	addi sp, sp, -36
-	sw ra, (sp)
-	sw s0, 4 (sp)
-	sw s1, 8 (sp)
-	sw s2, 12 (sp)
-	# a3-a7 are stored as local variable on the stack
-	sw a3, 16 (sp)
-	sw a4, 20 (sp)
-	sw a5, 24 (sp)
-	sw a6, 28 (sp)
-	sw a7, 32 (sp)
-
-
-	lw t0, 16 (sp) # int x
-	lw t1, 20 (sp) # int y
+	#STEP 3: Save and restore all necessary register to/from the stack
+	addi sp, sp, -16
+	sw a1, 12(sp)
+	sw a2, 8(sp)
+	sw a3, 4(sp)
+	sw ra, 0(sp)
+	# ADD YOUR STEP 3 CODE HERE
+	add a1, zero, a3
+	add a2, zero, a4
+	add a3, zero, a7
+	
+	
 	
 	_loopy:
-		_loopx:
-			mv a1, t0
-			mv a2, t1
-			mv a3, a7
-			#STEP x: Move the right value to registers a1-a3 and call draw_pixel
-			# ADD YOUR STEP x CODE HERE
-			jal draw_pixel
-			
-			addi t0, t0, 1
-			bne t0, a5, _loopx
-	addi t1, t1, 1
-	lw t0, 16 (sp)
-	bne t1, a6, _loopy
+		_loopx:	
+			#STEP 1: Move the right value to registers a1-a3 and call draw_pixel
+			# ADD YOUR STEP 1 CODE HERE
+			jal ra, draw_pixel
+			addi a1, a1, 1
+			ble a1, a5 _loopx
+		
+		addi a2, a2, 1
+		lw a1, 4(sp)
+		#STEP 2: Don't forget to set x=x0 again
+		# ADD YOUR STEP 2 CODE HERE			
+		ble a2, a6, _loopy
 
-	lw ra, (sp)
-	lw s0, 4 (sp)
-	lw s1, 8 (sp)
-	lw s2, 12 (sp)
-	# a3-a7 do not need to be restored according to calling convention
-	addi sp, sp, 36
+
+	
+	lw a1, 12(sp)
+	lw a2, 8(sp)
+	lw a3, 4(sp)
+	lw ra, 0(sp)
+	addi sp, sp, 16
+	
 	ret
-	# ADD YOUR STEP x CODE HERE
 
 .include "draw_pixel.asm"
 

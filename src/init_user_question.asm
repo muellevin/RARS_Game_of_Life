@@ -1,6 +1,8 @@
 
 # Main file for Game of Life Project
 # fpgrars interface
+.data
+.space 1000000
 .eqv FPG_DISPLAY_ADDRESS 0xFF000000
 .eqv FPG_DISPLAY_WIDTH 320
 .eqv FPG_DISPLAY_HEIGHT 240
@@ -10,10 +12,11 @@
 .eqv RARS_DISPLAY_ADDRESS 0x10010000
 .eqv RARS_KEYBOARD_ADDRESS 0xFFFF0000
 
-.eqv MIN_DISPLAY_SIZE 64
+.eqv MIN_DISPLAY_SIZE 64	# display size need to be 2^x | 6 <= x <= 10
+.eqv MAX_DISPLAY_SIZE 1024
 
 .eqv MIN_CELL_SIZE 1
-.eqv MAX_CELL_SIZE 8
+.eqv MAX_CELL_SIZE 16
 
 .eqv MAX_RULE 0	# min rule 0
 
@@ -26,10 +29,10 @@ ask_cell_size:
 .string "Size of cells min 1 max 8\n"
 
 ask_x_size_display:
-.string "x size of display rars(64; 128; 256; 512; 1024)\n"
+.string "height of display rars(64; 128; 256; 512; 1024)\n"
 
 ask_y_size_display:
-.string "y size of display rars(64; 128; 256; 512; 1024)\n"
+.string "width of display rars(64; 128; 256; 512; 1024)\n"
 
 ask_rule_to_apply:
 .string "which rule do you want tu use min 0 max 0\n"
@@ -91,9 +94,9 @@ init_user_questioning:
 		la t0, settings
 		# we are using t1 to safe fpgrars version addresses of keyboard display etc.
 		# we are using t2 for directly calculationg cells
-		addi sp, sp, -8
+		addi sp, sp, -4
 		sw t1, 0(sp)
-		sw t2, 4(sp)
+		# sw t2, 4(sp)
 		
 		lw t2, 0(t0)	# cell size
 		
@@ -105,17 +108,17 @@ init_user_questioning:
 		
 		li t1, FPG_DISPLAY_WIDTH
 		
-		divu t1, t1, t2
-		sw t1, 12(t0)
+		#divu t1, t1, t2
+		sw t1, 16(t0)
 		
 		li t1, FPG_DISPLAY_HEIGHT
-		divu t1, t1, t2
-		sw t1, 16(t0)
+		#divu t1, t1, t2
+		sw t1, 12(t0)
 		
 		# restore t1 and t2
 		lw t1, 0(sp)
-		lw t2, 4(sp)
-		addi sp, sp, 8
+		#lw t2, 4(sp)
+		addi sp, sp, 4
 		j question_rule
 	
 	version_rars:
@@ -156,16 +159,16 @@ init_user_questioning:
 		la t0, settings
 		
 		# calculating cells
-		addi sp, sp, -4
-		sw t1, 0(sp)
+		#addi sp, sp, -4
+		#sw t1, 0(sp)
 		
-		lw t1, 0(t0)
-		divu a0, a0, t1
-		sw a0, 12(t0)
+		#lw t1, 0(t0)
+		#divu a0, a0, t1
+		sw a0, 16(t0)
 		
 		# restore t1
-		lw t1, 0(sp)
-		addi sp, sp, 4
+		#lw t1, 0(sp)
+		#addi sp, sp, 4
 
 
 		question_y_display_size:
@@ -187,16 +190,16 @@ init_user_questioning:
 		la t0, settings
 		
 		# calculating cells
-		addi sp, sp, -4
-		sw t1, 0(sp)
+		#addi sp, sp, -4
+		#sw t1, 0(sp)
 		
-		lw t1, 0(t0)
-		divu a0, a0, t1
-		sw a0, 16(t0)
+		#lw t1, 0(t0)
+		#divu a0, a0, t1
+		sw a0, 12(t0)
 		
 		# restore t1
-		lw t1, 0(sp)
-		addi sp, sp, 4
+		#lw t1, 0(sp)
+		#addi sp, sp, 4
 		
 	question_rule:
 		la a1, question_rule	# jump back to where we start if invalid input
@@ -267,31 +270,32 @@ rars_display_sizes:
 # a0 value to ckeck
 # a1 repeat input (call invalid_input)
 # a2 valid input -> next instruction to do
+# t0 is temp register from outer call so we don't stack it
+# t1 is needed temp regster for max display size
+	addi sp, sp, -4
+	sw t1, 0(sp)
 
-	size_64:
+	#size_64-1024:
 	# now checkingg if the input was valid
 	li t0, MIN_DISPLAY_SIZE
-	bne a0, t0, size_128
-	jr a2
+	li t1, MAX_DISPLAY_SIZE
 	
-	size_128:
+	loop_allowed_size:
+	bge t0, t1, invalid_display_size
+	beq a0, t0, return_to_safe
 	slli t0, t0, 1
-	bne a0, t0, size_256
-	jr a2
-		
-	size_256:
-	slli t0, t0, 1
-	bne a0, t0, size_512
-	jr a2
-		
-	size_512:
-	slli t0, t0, 1
-	bne a0, t0, size_1024
-	jr a2
+	j loop_allowed_size
+
+	# restoring needed t1 register and jump to invalid
+	invalid_display_size:
+	lw t1, 0(sp)
+	addi sp, sp, 4
+	j invalid_input
 	
-	size_1024:
-	slli t0, t0, 1
-	bne a0, t0, invalid_input
+	# restoring needed t1 register and jump to safe address
+	return_to_safe:
+	lw t1, 0(sp)
+	addi sp, sp, 4
 	jr a2
 
 
