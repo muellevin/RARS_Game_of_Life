@@ -1,52 +1,7 @@
 
 # Main file for Game of Life Project
 # fpgrars interface
-.data
-.space 1000000
-.eqv FPG_DISPLAY_ADDRESS 0xFF000000
-.eqv FPG_DISPLAY_WIDTH 320
-.eqv FPG_DISPLAY_HEIGHT 240
-.eqv FPG_KEYBOARD_ADDRESS 0xFF200000
 
-# rars interface
-.eqv RARS_DISPLAY_ADDRESS 0x10010000
-.eqv RARS_KEYBOARD_ADDRESS 0xFFFF0000
-
-.eqv MIN_DISPLAY_SIZE 64	# display size need to be 2^x | 6 <= x <= 10
-.eqv MAX_DISPLAY_SIZE 1024
-
-.eqv MIN_CELL_SIZE 1
-.eqv MAX_CELL_SIZE 16
-
-.eqv MAX_RULE 0	# min rule 0
-
-.data
-
-ask_rars_version:
-.string "are you using fpgrars(any number) or rars(0)\n"
-
-ask_cell_size:
-.string "Size of cells min 1 max 8\n"
-
-ask_x_size_display:
-.string "height of display rars(64; 128; 256; 512; 1024)\n"
-
-ask_y_size_display:
-.string "width of display rars(64; 128; 256; 512; 1024)\n"
-
-ask_rule_to_apply:
-.string "which rule do you want tu use min 0 max 0\n"
-
-ask_time_till_next_generation:
-.string "how much time in ms should the programm wait till next generation is shown max 2³²-1\n"
-
-ask_start_density:
-.string "Density of living cells when starting Game of Life (10-100)%\n"
-
-invalid_input_message:
-.string "Somehow you did not gave the valid input try again\n"
-
-.text
 
 j end	
 
@@ -213,7 +168,7 @@ init_user_questioning:
 		ecall
 	
 		# now checkingg if the input was valid
-		li t0, 0
+		li t0, 1	# min rule is one and default
 		blt a0, t0, invalid_input
 		li t0, MAX_RULE
 		bgt a0, t0, invalid_input	
@@ -224,14 +179,18 @@ init_user_questioning:
 		
 		
 	get_time:
+		la a1, get_time	# jump back to where we start if invalid input
 		# ask user about time till next generation should be rendered
 		la a0, ask_time_till_next_generation
 		li a7, 4
 		ecall
 		
 		# here we will accept anything
-		li a7, 5	#get size input as integer
+		li a7, 5	#get time input as integer
 		ecall
+		
+		li t0, 100000		# i am setting a limit because inever want to see someone wait 7,101467089947 weeks??!
+		bgt a0, t0, invalid_input
 		
 		# loading setting address
 		la t0, settings
@@ -281,7 +240,7 @@ rars_display_sizes:
 	li t1, MAX_DISPLAY_SIZE
 	
 	loop_allowed_size:
-	bge t0, t1, invalid_display_size
+	bgt t0, t1, invalid_display_size
 	beq a0, t0, return_to_safe
 	slli t0, t0, 1
 	j loop_allowed_size

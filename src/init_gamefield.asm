@@ -22,26 +22,13 @@ init_gamefield:
 	
 	la t0, settings
 	lw t1, 28(t0)	#density
-	lw s0, 12(t0)	# x size
-	lw s1, 16(t0)	# y size
+	lw s0, 12(t0)	# width size
+	lw s1, 16(t0)	# height size
 	lw s2, 0(t0)	# cell size
 	
-	#mv t2, s2	# left pseudo cells
-	#mv t3, s2	# top peseudo cells
 	li t2, 0
 	li t3, 0
 	
-	#sub s0, s0, s2	# right pseudo cells 
-	#sub s1, s1, s2	# bottom pseudo cells
-	
-	
-	
-	# Function to draw rectangle from position x1,y1 to x2,y2 with fill color c
-# a3: unsigned integer x1 -- left boundary of rectangle
-# a4: unsigned integer y1 -- top boundary of rectangle
-# a5: unsigned integer x2 -- right boundary of rectangle
-# a6: unsigned integer y2 -- bottom boundary of rectangle
-# a7: unsigned integer c  -- fill color of rectangle as RGB value
 	init_living_cells:
 	
 	
@@ -101,7 +88,7 @@ continue_gamefield:
 	add a1, a1, a3	# checking if next cell is still in display size
 	add a1, a1, a3
 	addi a1, a1, -1
-	bge a1, a5, check_y_field_size	# if x size is too much checking y size
+	bge a1, a4, check_y_field_size	# if wdth is too much checking height size
 	addi a1, a1, 1
 	sub a1, a1, a3
 	ret
