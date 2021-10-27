@@ -10,96 +10,225 @@ init_user_questioning:
 	# we are using t0 as comparison register and settings address loading 
 	# i will not reset the aX registers since they are mostly used for enviromental calls
 	addi sp, sp, -4
+	sw ra, 0(sp)
+	
+	jal ra, question_cell_size
+	jal ra, question_rars_version
+	jal ra, question_rule
+	jal ra, question_time
+	jal ra, question_start_density	
+		
+	# restore ra
+	lw ra, 0(sp)
+	addi sp,sp, 4
+
+ret
+
+
+question_cell_size:
+	
+	addi sp, sp, -4
+	sw t0, 0(sp)
+	
+	la a1, question_cell_size	# jump back to where we start if invalid input
+
+	# ask user about cell size
+	la a0, ask_cell_size	
+	li a7, 4
+	ecall
+
+	li a7, 5	#get size input as integer
+	ecall
+
+	# now checkingg if the input was valid
+	li t0, MIN_CELL_SIZE
+	blt a0, t0, invalid_cell_size
+	li t0, MAX_CELL_SIZE
+	bgt a0, t0, invalid_cell_size	
+
+	# loading setting address
+	la t0, settings
+	sw a0, 0(t0)
+	
+	#resetting t0
+	lw t0, 0(sp)
+	addi sp, sp, 4	
+	ret
+	
+	invalid_cell_size:
+	#resetting t0
+	lw t0, 0(sp)
+	addi sp, sp, 4
+	j invalid_input
+
+
+question_rule:
+
+	addi sp, sp, -4
 	sw t0, 0(sp)
 
-	
-	get_cell_size:
-		la a1, get_cell_size	# jump back to where we start if invalid input
-	
-		# ask user about cell size
-		la a0, ask_cell_size	
-		li a7, 4
-		ecall
-	
-		li a7, 5	#get size input as integer
-		ecall
-	
-		# now checkingg if the input was valid
-		li t0, MIN_CELL_SIZE
-		blt a0, t0, invalid_input
-		li t0, MAX_CELL_SIZE
-		bgt a0, t0, invalid_input	
+	la a1, question_rule	# jump back to where we start if invalid input
 
-		# loading setting address
-		la t0, settings
-		sw a0, 0(t0)
+	# ask user about rule to apply
+	la a0, ask_rule_to_apply	
+	li a7, 4
+	ecall
 
-	question_rars_version:
-		# no jump back address needed
+	li a7, 5	#get size input as integer
+	ecall
 
-		# ask user about cell size
-		la a0, ask_rars_version
-		li a7, 4
-		ecall
+	# now checkingg if the input was valid
+	li t0, 1	# min rule is one and default
+	blt a0, t0, invalid_rule
+	li t0, MAX_RULE
+	bgt a0, t0, invalid_rule	
+
+	# loading setting address
+	la t0, settings
+	sw a0, 20(t0)
 	
-		li a7, 5	#get size input as integer
-		ecall
-		
-		beqz a0, version_rars
-		la t0, settings
-		# we are using t1 to safe fpgrars version addresses of keyboard display etc.
-		# we are using t2 for directly calculationg cells
-		addi sp, sp, -4
-		sw t1, 0(sp)
-		# sw t2, 4(sp)
-		
-		lw t2, 0(t0)	# cell size
-		
-		li t1, FPG_DISPLAY_ADDRESS
-		sw t1, 4(t0)
-		
-		li t1, FPG_KEYBOARD_ADDRESS
-		sw t1, 8(t0)
-		
-		li t1, FPG_DISPLAY_WIDTH
-		
-		#divu t1, t1, t2
-		sw t1, 16(t0)
-		
-		li t1, FPG_DISPLAY_HEIGHT
-		#divu t1, t1, t2
-		sw t1, 12(t0)
-		
-		# restore t1 and t2
-		lw t1, 0(sp)
-		#lw t2, 4(sp)
-		addi sp, sp, 4
-		j question_rule
+	#resetting t0
+	lw t0, 0(sp)
+	addi sp, sp, 4	
+	ret
+	
+	invalid_rule:
+	#resetting t0
+	lw t0, 0(sp)
+	addi sp, sp, 4
+	j invalid_input
+
+question_time:
+
+	addi sp, sp, -4
+	sw t0, 0(sp)
+	
+	la a1, question_time	# jump back to where we start if invalid input
+	# ask user about time till next generation should be rendered
+	la a0, ask_time_till_next_generation
+	li a7, 4
+	ecall
+	
+	# here we will accept anything
+	li a7, 5	#get time input as integer
+	ecall
+	
+	li t0, 100000		# i am setting a limit because inever want to see someone wait 7,101467089947 weeks??!
+	bgt a0, t0, invalid_time
+	
+	# loading setting address
+	la t0, settings
+	sw a0, 24(t0)
+	
+	#resetting t0
+	lw t0, 0(sp)
+	addi sp, sp, 4	
+	ret
+	
+	invalid_time:
+	#resetting t0
+	lw t0, 0(sp)
+	addi sp, sp, 4
+	j invalid_input
+
+
+question_start_density:
+
+	addi sp, sp, -4
+	sw t0, 0(sp)
+	
+	la a1, question_start_density	# jump back to where we start if invalid input
+	
+	# ask user about density
+	la a0, ask_start_density	
+	li a7, 4
+	ecall
+	
+	li a7, 5	#get density input as integer
+	ecall
+	
+	# now checkingg if the input was valid
+	li t0, 10		# lower would be boring
+	blt a0, t0, invalid_density
+	li t0, 100
+	bgt a0, t0, invalid_density
+
+	# loading setting address
+	la t0, settings
+	sw a0, 28(t0)
+	
+	#resetting t0
+	lw t0, 0(sp)
+	addi sp, sp, 4	
+	ret
+	
+	invalid_density:
+	#resetting t0
+	lw t0, 0(sp)
+	addi sp, sp, 4
+	j invalid_input
+
+question_rars_version:
+	# no jump back address needed
+	
+	# ask user about rars version (fpgrars or rars)
+	la a0, ask_rars_version
+	li a7, 4
+	ecall
+	
+	li a7, 5	#get size input as integer
+	ecall
+	
+	beqz a0, version_rars
+	addi sp, sp, -8
+	sw t0, 0(sp)
+	sw t1, 4(sp)	# we are using t1 to safe fpgrars version addresses of keyboard display etc.
+	
+	la t0, settings
+	
+		# load fpgrars values in settings	
+	li t1, FPG_DISPLAY_ADDRESS
+	sw t1, 4(t0)
+	
+	li t1, FPG_KEYBOARD_ADDRESS
+	sw t1, 8(t0)
+	
+	li t1, FPG_DISPLAY_WIDTH
+	sw t1, 16(t0)
+	
+	li t1, FPG_DISPLAY_HEIGHT
+	sw t1, 12(t0)
+	
+	# restore t1 and t0
+	lw t1, 4(sp)
+	lw t0, 0(sp)
+	addi sp, sp, 8
+	ret
 	
 	version_rars:
-		# setting rars enviromenet addresses
+	# setting rars enviromenet addresses
+	addi sp, sp, -8
+	sw t0, 0(sp)
+	sw t1, 4(sp)	# we are using t1 to saferars version addresses of keyboard display etc.
 		
-		la t0, settings
-		# we are using t1 to safe fpgrars version addresses of keyboard display etc.
-		addi sp, sp, -4
-		sw t1, 0(sp)
+	la t0, settings
 		
-		li t1, RARS_DISPLAY_ADDRESS
-		sw t1, 4(t0)
-		
-		li t1, RARS_KEYBOARD_ADDRESS
-		sw t1, 8(t0)
-		
-		# restore t1
-		lw t1, 0(sp)
-		addi sp, sp, 4
+	li t1, RARS_DISPLAY_ADDRESS
+	sw t1, 4(t0)
+	
+	li t1, RARS_KEYBOARD_ADDRESS
+	sw t1, 8(t0)
+	
+	# restore t1
+	lw t1, 4(sp)
+	addi sp, sp, 4
+	# we are using t0 as settings adress for our display size question
 	
 	question_display_size:
 		# rars can have diffrent display sizes
 		la a1, question_display_size	# jump back to where we start if invalid input
 		la a2, safe_x
 		
-	
 		# ask user about x-size display
 		la a0, ask_x_size_display	
 		li a7, 4
@@ -112,24 +241,12 @@ init_user_questioning:
 		
 		safe_x:
 		la t0, settings
-		
-		# calculating cells
-		#addi sp, sp, -4
-		#sw t1, 0(sp)
-		
-		#lw t1, 0(t0)
-		#divu a0, a0, t1
 		sw a0, 16(t0)
 		
-		# restore t1
-		#lw t1, 0(sp)
-		#addi sp, sp, 4
-
-
 		question_y_display_size:
 		# rars can have diffrent display sizes
 		la a1, question_y_display_size	# jump back to where we start if invalid input
-		la a2, safe_y
+		la a2, safe_y			# a2 is jump register when valid input
 		
 		# ask user about y-size display
 		la a0, ask_y_size_display	
@@ -139,96 +256,23 @@ init_user_questioning:
 		li a7, 5	#get size input as integer
 		ecall
 	
-		j rars_display_sizes	# a2 is jump register
+		j rars_display_sizes	# a2 is jump register when valid input
 		
 		safe_y:
 		la t0, settings
-		
-		# calculating cells
-		#addi sp, sp, -4
-		#sw t1, 0(sp)
-		
-		#lw t1, 0(t0)
-		#divu a0, a0, t1
 		sw a0, 12(t0)
 		
-		# restore t1
-		#lw t1, 0(sp)
-		#addi sp, sp, 4
-		
-	question_rule:
-		la a1, question_rule	# jump back to where we start if invalid input
-	
-		# ask user about rule to apply
-		la a0, ask_rule_to_apply	
-		li a7, 4
-		ecall
-	
-		li a7, 5	#get size input as integer
-		ecall
-	
-		# now checkingg if the input was valid
-		li t0, 1	# min rule is one and default
-		blt a0, t0, invalid_input
-		li t0, MAX_RULE
-		bgt a0, t0, invalid_input	
+		# restore t0
+		lw t0, 0(sp)
+		addi sp, sp, 4
+		ret
 
-		# loading setting address
-		la t0, settings
-		sw a0, 20(t0)
-		
-		
-	get_time:
-		la a1, get_time	# jump back to where we start if invalid input
-		# ask user about time till next generation should be rendered
-		la a0, ask_time_till_next_generation
-		li a7, 4
-		ecall
-		
-		# here we will accept anything
-		li a7, 5	#get time input as integer
-		ecall
-		
-		li t0, 100000		# i am setting a limit because inever want to see someone wait 7,101467089947 weeks??!
-		bgt a0, t0, invalid_input
-		
-		# loading setting address
-		la t0, settings
-		sw a0, 24(t0)
-	
-	get_start_density:
-		la a1, get_start_density	# jump back to where we start if invalid input
-	
-		# ask user about density
-		la a0, ask_start_density	
-		li a7, 4
-		ecall
-	
-		li a7, 5	#get density input as integer
-		ecall
-	
-		# now checkingg if the input was valid
-		li t0, 10
-		blt a0, t0, invalid_input
-		li t0, 100
-		bgt a0, t0, invalid_input	
-
-		# loading setting address
-		la t0, settings
-		sw a0, 28(t0)
-		
-		
-	# restore t0
-	lw t0, 0(sp)
-	addi sp,sp, 4
-
-ret
-	
 
 rars_display_sizes:
 # a0 value to ckeck
 # a1 repeat input (call invalid_input)
 # a2 valid input -> next instruction to do
+
 # t0 is temp register from outer call so we don't stack it
 # t1 is needed temp regster for max display size
 	addi sp, sp, -4
