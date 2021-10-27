@@ -7,8 +7,6 @@ j end
 
 init_user_questioning:
 
-	# we are using t0 as comparison register and settings address loading 
-	# i will not reset the aX registers since they are mostly used for enviromental calls
 	addi sp, sp, -4
 	sw ra, 0(sp)
 	

@@ -44,7 +44,7 @@ key_listener:
   				
   			switch.minus:
   				li t1, '-'
-  				bne t0, t1 switch.end	##TODO
+  				bne t0, t1 switch.reset	##TODO
   				lw t3, 24(s0)		# loading timme to next gen
   				beqz t3, switch.end	# Might print a message in future
   				addi t3, t3, -1		
@@ -54,14 +54,20 @@ key_listener:
   			switch.reset:
   				li t1, 'r'
   				bne t0, t1 switch.life_rule
-  				jal ra, init_user_questioning	# complete reset settings to input
+  				jal ra, reset	# complete reset settings to input
   				jal ra, init_gamefield		# i need a new gamefield
   				j switch.end
   				
   			switch.life_rule:
   				li t1, 'l'
-  				bne t0, t1 switch.finish
+  				bne t0, t1 switch.time
   				jal ra, question_rule
+  				j switch.end
+  				
+  			switch.time:			# in case you messed the time really bad
+  				li t1, 't'
+  				bne t0, t1 switch.finish
+  				jal ra, question_time
   				j switch.end
   			
   			switch.finish:
@@ -90,3 +96,40 @@ switch.end:
 	lw t3, 28(sp)
 	addi sp, sp, 32
 	ret
+
+reset:
+	addi sp, sp, -12
+	sw ra, 0(sp)
+	sw t0, 4(sp)
+	sw t1, 8(sp)
+	
+	la t0, settings
+	
+	#might advance that later...
+	#reset display:
+	li a3, 0
+	li a4, 0
+	lw a5, 12(t0)
+	lw a6, 16(t0)
+	li a7, 0
+	jal ra, draw_rectangle	# make the display black
+	
+	jal ra, question_cell_size
+	
+	lw t0, 4(t0)	# display adress
+	li t1, RARS_DISPLAY_ADDRESS
+	
+	bne t0, t1, continue_reset
+	jal ra, version_rars
+	continue_reset:
+	jal ra, question_rule
+	jal ra, question_time
+	jal ra, question_start_density
+			
+	# restore stack variables
+	lw ra, 0(sp)
+	lw t0, 4(sp)
+	lw t1, 8(sp)
+	addi sp,sp, 12
+
+ret
