@@ -3,6 +3,7 @@
 .data
 
 .space 1048576	# Addressing for 512x512 Display addresses -> bug at 0x1040...
+# it is disgusting but i guess the easiest solution for now
 .eqv FPG_DISPLAY_ADDRESS 0xFF000000
 .eqv FPG_DISPLAY_WIDTH 320
 .eqv FPG_DISPLAY_HEIGHT 240
@@ -61,5 +62,8 @@ settings:
 
 .word 50	# start density	this is random so no UT								#addresss by 28
 
+state_bits:
+.space 32768	# malloc for 512x512Pixel/32Bits of word x 4 addressing
+# it is disgusting but i guess the easiest solution for now
 
 .text

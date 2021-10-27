@@ -2,6 +2,7 @@
 
 .include "constants_settings.asm"
 # init
+
 jal ra, init_user_questioning
 jal ra, init_gamefield
 

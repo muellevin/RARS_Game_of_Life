@@ -8,7 +8,7 @@ ecall
 
 
 init_gamefield:
-	# sw ra, sp
+
 	addi sp, sp, -20
 	sw t0, 0(sp)
 	sw t1, 4(sp)
@@ -23,8 +23,6 @@ init_gamefield:
 	li t3, 0
 	
 	init_living_cells:
-	
-	
 	# coords of cell
 	mv a1, t2
 	mv a2, t3
@@ -209,3 +207,71 @@ neighboor_status:
 	ret
 
 
+# cropped from rules.asm next_generation
+# -> looks even more weird from used registers
+print_next_generation:
+	# saving all needed register those of rules as well
+	addi sp, sp, -24
+	sw t2, 0(sp)
+	sw t3, 4(sp)
+	sw s0, 8(sp)
+	sw s1, 12(sp)
+	sw s2, 16(sp)
+	sw ra, 20(sp)
+	
+	la s0, state_bits	# base adress for state bits
+	li s2, 31	# bits in one word +1 bit your bit; i changed the register at a later point
+	lw s1, 0(s0)	# first value
+	
+	li t2, 0
+	li t3, 0
+	
+	print_through_gamefield:
+	# current cell:
+		mv a1, t2
+		mv a2, t3
+		
+		get_status_bit:
+		srl a4, s1, s2		# getting cell status
+		andi a4, a4, 1		# only single bit is needed
+
+		beqz a4, continue_print_gamefiled
+		
+		# i already have my cell coords::
+		jal ra, get_pixel
+		la ra, continue_print_gamefiled
+		
+		bnez a3, print_dead_cell
+		j print_living_cell
+		
+		
+		continue_print_gamefiled:
+		addi s2, s2, -1
+		bgez s2, same_status_word_print
+		
+		li s2, 31		# resetting bit count
+		addi s0, s0, 4		# going to next word adress
+		lw s1, 0(s0)		# and loading the next word status bits
+		
+		same_status_word_print:
+		# going to next cell
+		la a0, print_next_gemeration_finished	# where to go if gamefield is finished
+		#current pos
+		mv a1, t2	
+		mv a2, t3
+		jal ra, continue_gamefield
+		# load coords of next cell
+		mv t2, a1
+		mv t3, a2
+		j print_through_gamefield
+	
+	
+	print_next_gemeration_finished:	
+	lw t2, 0(sp)
+	lw t3, 4(sp)
+	lw s0, 8(sp)
+	lw s1, 12(sp)
+	lw s2, 16(sp)
+	lw ra, 20(sp)
+	addi sp, sp, 24
+	ret

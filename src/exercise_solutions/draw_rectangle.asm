@@ -89,5 +89,33 @@ draw_cell:
 	addi sp, sp, 8
 ret
 
+print_dead_cell:
+# input
+# a1 x cell pos
+# a2 y cell pos
+	addi sp, sp, -4
+	sw ra, 0(sp)
+
+	li a7, 0	# dead cell
+	jal ra, draw_cell
+	
+	lw ra, 0(sp)
+	addi sp, sp, 4
+	ret
+
+print_living_cell:
+# input
+# a1 x cell pos
+# a2 y cell pos
+	addi sp, sp, -4
+	sw ra, 0(sp)
+
+	li a7, ALIVE	# dead cell
+	jal ra, draw_cell
+	
+	lw ra, 0(sp)
+	addi sp, sp, 4
+	ret
+
 .include "draw_pixel.asm"
 
