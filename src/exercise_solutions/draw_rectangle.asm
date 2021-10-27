@@ -63,5 +63,31 @@ draw_rectangle:
 	
 	ret
 
+draw_cell:
+# input
+# a1 x cell pos
+# a2 y cell pos
+# inderekt a7 -> color
+
+	addi sp, sp, -8
+	sw t0, 0(sp)
+	sw ra, 4(sp)
+	
+	la t0, settings
+	lw t0, 0(t0)
+	
+	mv a3, a1
+	mv a4, a2
+	add a5, a1, t0	# here would be already the next cell so -1
+	add a6, a2, t0
+	addi a5, a5, -1
+	addi a6, a6, -1
+	jal ra, draw_rectangle
+
+	lw t0, 0(sp)
+	lw ra, 4(sp)
+	addi sp, sp, 8
+ret
+
 .include "draw_pixel.asm"
 

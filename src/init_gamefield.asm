@@ -7,24 +7,17 @@ ecall
 .end_macro
 
 
-
 init_gamefield:
 	# sw ra, sp
-	addi sp, sp, -32
+	addi sp, sp, -20
 	sw t0, 0(sp)
 	sw t1, 4(sp)
 	sw t2, 8(sp)
 	sw t3, 12(sp)
-	sw s0, 16(sp)
-	sw s1, 20(sp)
-	sw s2, 24(sp)
-	sw ra, 28(sp)
+	sw ra, 16(sp)
 	
 	la t0, settings
 	lw t1, 28(t0)	#density
-	lw s0, 12(t0)	# width size
-	lw s1, 16(t0)	# height size
-	lw s2, 0(t0)	# cell size
 	
 	li t2, 0
 	li t3, 0
@@ -33,77 +26,92 @@ init_gamefield:
 	
 	
 	# coords of cell
-		mv a3, t2
-		mv a4, t3
-		add a5, t2, s2
-		add a6, t3, s2
-		addi a5, a5, -1
-		addi a6, a6, -1
+	mv a1, t2
+	mv a2, t3
 	rand
 	ble a0, t1, cell_alive
-	la a0, return_to_main
-		mv a1, t2
-		mv a2, t3
-		mv a3, s2
-		mv a4, s0
-		mv a5, s1
-	jal ra, continue_gamefield	# getting next cell
 	j adding_next_cell
 	
-	
 	cell_alive:
-		
-		
-		li a7, ALIVE	# all living cells are green
-		jal draw_rectangle
-		la a0, return_to_main
 		mv a1, t2
 		mv a2, t3
-		mv a3, s2
-		mv a4, s0
-		mv a5, s1
-		jal ra, continue_gamefield
-		j adding_next_cell
+		li a7, ALIVE	# all living cells are green
+		jal draw_cell
 		
 	adding_next_cell:
+	la a0, return_to_main
+	mv a1, t2	# incase some below function modified them
+	mv a2, t3
+	jal ra, continue_gamefield	# input a1, a2
 	mv t2, a1
 	mv t3, a2
 	j init_living_cells
-	
+
 	
 	return_to_main:
 	lw t0, 0(sp)
 	lw t1, 4(sp)
 	lw t2, 8(sp)
 	lw t3, 12(sp)
-	lw s0, 16(sp)
-	lw s1, 20(sp)
-	lw s2, 24(sp)
-	lw ra, 28(sp)
-	addi sp, sp, 32
+	lw ra, 16(sp)
+	addi sp, sp, 20
 	ret
 	
 
 continue_gamefield:
-	add a1, a1, a3	# checking if next cell is still in display size
-	add a1, a1, a3
+# input:
+# a0 where to jump if gemfield is finished
+# a1 current x pos
+# a2 current y pos
+# return:
+# a1 x pos of next cell
+# a2 y pos of next cell
+
+
+	addi sp, sp, -16
+	sw t0, 0(sp)
+	sw s0, 4(sp)
+	sw s1, 8(sp)
+	sw s2, 12(sp)
+	
+	la t0, settings
+	lw s0, 12(t0)	# width size
+	lw s1, 16(t0)	# height size
+	lw s2, 0(t0)	# cell size
+	
+	add a1, a1, s2	# checking if next cell is still in display size
+	add a1, a1, s2
 	addi a1, a1, -1
-	bge a1, a4, check_y_field_size	# if wdth is too much checking height size
+	bge a1, s0, check_y_field_size	# if wdth is too much checking height size
 	addi a1, a1, 1
-	sub a1, a1, a3
-	ret
+	sub a1, a1, s2
+	j return_next_cell_coord
 	
 	check_y_field_size:
-	add a2, a2, a3
-	add a2, a2, a3
+	add a2, a2, s2
+	add a2, a2, s2
 	addi a2, a2, -1
 	li a1, 0 		# only checking y size when x size is too much -> reseting x size
-	bge a2, a5, return_to_gamefield_caller
+	bge a2, s1, return_to_gamefield_caller
 	addi a2, a2, 1
-	sub a2, a2, a3
+	sub a2, a2, s2
+	
+	return_next_cell_coord:
+	# resetting used register and return to ra
+	lw t0, 0(sp)
+	lw s0, 4(sp)
+	lw s1, 8(sp)
+	lw s2, 12(sp)
+	addi sp, sp, 16
 	ret
 	
 	return_to_gamefield_caller:
+	# resetting used register and go to next call when gamefield is finished
+	lw t0, 0(sp)
+	lw s0, 4(sp)
+	lw s1, 8(sp)
+	lw s2, 12(sp)
+	addi sp, sp, 16
 	jr a0
 
 
@@ -198,53 +206,6 @@ neighboor_status:
 	lw ra, 20(sp)
 	lw s0, 24(sp)
 	addi sp, sp, 28
-	ret
-
-
-get_pixel:
-# get colored pixel at position (x,y)  
-
-# Inputs
-#----------------------
-#    a1: x
-#    a2: y
-# Outputs: a3: color
-
-	#STEP 3a: Save the callee save registers on the stack
-	# ADD YOUR STEP x CODE HERE
-	addi sp, sp, -16
-	sw s0, 0 (sp)
-	sw s1, 4 (sp)
-	sw s2, 8 (sp)
-	sw s3, 12(sp)
-	
-	la s3, settings
-	#STEP 1: Use the constants DISPLAY_ADDRESS and DISPLAY_WIDTH defined in cesplib_rars.asm and the arguments passed via registers a1 and a2 to calculate the memory address that you  need.
-	# ADD YOUR STEP x CODE HERE
-	lw s0, 4(s3)	# display address
-	lw s1, 12(s3)	# y size
-	
-	# y_offset
-	mul s2, s1, a2  # y∗DISPLAY_WIDTH
-			
-	# crt_address = base_address + x_offset + y_offset
-	add s2, a1, s2
-	slli s2, s2, 2 # *4 to byte address
-	
-	add s2, s2, s0 
-
-	#STEP 2: Store the value of a3 in the memory at the address you have calculated before.
-	# ADD YOUR STEP x CODE HERE
-	# *crt_address = a3
-	lw a3, 0(s2)
-
-	#STEP 3b: Don't forget to restore the callee save values
-	# ADD YOUR STEP x CODE HERE
-	lw s0, 0 (sp)
-	lw s1, 4 (sp)
-	lw s2, 8 (sp)
-	lw s3, 12(sp)
-	addi sp, sp, 16
 	ret
 
 
