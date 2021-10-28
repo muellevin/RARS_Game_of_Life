@@ -130,10 +130,12 @@ neighboor_status:
 	
 	la t3, settings
 	lw s0, 0(t3)
+	
+	mv t0, a1	# saving the coords of current cell
+	mv t1, a2
 
 	top_left:
-	mv t0, a1
-	mv t1, a2
+	
 	sub a1, t0, s0
 	sub a2, t1, s0
 	bltz a2, mid_left
@@ -143,13 +145,15 @@ neighboor_status:
 	addi a4, a4, 1
 	
 	top_mid:
-	add a1, a1, s0
+	mv a1, t0
+	sub a2, t1, s0
 	jal ra, get_pixel
 	beqz a3, top_right
 	addi a4, a4, 1
 	
 	top_right:
-	add a1, a1, s0
+	add a1, t0, s0
+	sub a2, t1, s0
 	lw t4, 12(t3)
 	bgeu a1, t4, mid_left
 	jal ra, get_pixel
@@ -166,12 +170,14 @@ neighboor_status:
 	
 	mid_right:
 	add a1, t0, s0
+	mv a2, t1
+	lw t4, 12(t3)
+	bgeu a1, t4, bottom_left
 	jal ra, get_pixel
 	beqz a3, bottom_left
 	addi a4, a4, 1
 	
 	bottom_left:
-	sub a1, t0, s0
 	sub a1, t0, s0
 	add a2, t1, s0
 	lw t4, 16(t3)
@@ -182,13 +188,15 @@ neighboor_status:
 	addi a4, a4, 1
 
 	bottom_mid:
-	add a1, a1, s0
+	mv a1, t0
+	add a2, t1, s0
 	jal ra, get_pixel
 	beqz a3, bottom_right
 	addi a4, a4, 1
 	
 	bottom_right:
-	add a1, a1, s0
+	add a1, t0, s0
+	add a2, t1, s0
 	lw t4, 12(t3)
 	bgeu a1, t4, finish_counting_neighboor
 	jal ra, get_pixel
