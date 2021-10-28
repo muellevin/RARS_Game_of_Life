@@ -192,10 +192,10 @@ question_rars_version:
 	sw t1, 8(t0)
 	
 	li t1, FPG_DISPLAY_WIDTH
-	sw t1, 16(t0)
+	sw t1, 12(t0)
 	
 	li t1, FPG_DISPLAY_HEIGHT
-	sw t1, 12(t0)
+	sw t1, 16(t0)
 	
 	# restore t1 and t0
 	lw t1, 4(sp)

@@ -110,7 +110,9 @@ reset:
 	li a3, 0
 	li a4, 0
 	lw a5, 12(t0)
+	addi a5, a5, -1
 	lw a6, 16(t0)
+	addi a6, a6, -1
 	li a7, 0
 	jal ra, draw_rectangle	# make the display black
 	
