@@ -35,29 +35,24 @@ next_generation:
 		# now the magic begins
 		
 		la ra, set_status_bit	# directly jump there instead jump in here again
-		bne t0, t1, check_rule_2
-		j rule_1	# returning status bit -->1 -> change status (dead -> alive; alive ->dead)
 		# normal conway
+		beq t0, t1, rule_1
+		# returning status bit -->1 -> change status (dead -> alive; alive ->dead)
 
 		# anti conway
-		check_rule_2:
 		li t0, 2
-		bne t0, t1, check_rule_3
-		j rule_2
+		beq t0, t1, rule_2
 		
 		# copy 
-		check_rule_3:
 		li t0, 3
-		bne t0, t1, check_rule_4
-		j rule_3
+		bne t0, t1, rule_3
+
 		
 		# exploding labyrint 
-		check_rule_4:
 		li t0, 4
-		bne t0, t1, check_rule_5
-		j rule_4
+		bne t0, t1, rule_4
 		
-		check_rule_5:
+		# not possible
 		li a4, 0
 		
 		# well shouldn't be possible

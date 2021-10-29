@@ -6,9 +6,8 @@
     "/home/cesp/cesp_course/tools/rars/rars.jar"
   ],
   "arguments": [
-    
     "unittest_edge_detection_test.asm"
   ],
   "description": "next cell with edge detection unittest",
-  "expected_result": "RARS 1.5  Copyright 2003-2019 Pete Sanderson and Kenneth Vollmar\n\n0\n0\n0\n\n0\n0\n0\n\n0\n0\n0\n\n0\n0\n0\n\n\nProgram terminated by calling exit"
+  "expected_result": "RARS 1.5  Copyright 2003-2019 Pete Sanderson and Kenneth Vollmar\n\n0\n0\n0\n\n0\n0\n0\n\n0\n0\n0\n\n0\n0\n0\n\n\nProgram terminated by calling exit\n"
 }
