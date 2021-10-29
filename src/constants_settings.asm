@@ -21,7 +21,7 @@
 
 .eqv MAX_RULE 3	# min rule 1
 
-.eqv ALIVE 0x00ff00
+.eqv ALIVE 0xa0a397 
 
 ask_rars_version:
 .string "are you using fpgrars(any number) or rars(0)\n"

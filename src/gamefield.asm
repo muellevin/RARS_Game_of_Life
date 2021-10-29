@@ -283,3 +283,44 @@ print_next_generation:
 	lw ra, 20(sp)
 	addi sp, sp, 24
 	ret
+
+# more efficient way to print black screen (reset)
+print_black_display:
+	addi sp, sp, -12
+	sw t0, 0(sp)
+	sw t1, 4(sp)
+	sw ra, 8(sp)
+
+	li t0, 0	# display start coords
+	li t1, 0	
+	
+	print_trough_blacking_display:
+	mv a1, t0
+	mv a2, t1
+	
+	jal ra, get_pixel
+	mv a1, t0
+	mv a2, t1
+	la ra, continue_blacking_display
+	bnez a3, print_dead_cell
+	
+	continue_blacking_display:
+	la a0, print_black_display_finished	# where to go if gamefield is finished
+	#current pos
+	mv a1, t0
+	mv a2, t1
+	jal ra, continue_gamefield
+	# load coords of next cell
+	mv t0, a1
+	mv t1, a2
+	j print_trough_blacking_display
+	
+	
+	print_black_display_finished:
+	lw t0, 0(sp)
+	lw t1, 4(sp)
+	lw ra, 8(sp)
+	addi sp, sp, 12
+	ret
+	
+	
