@@ -51,7 +51,13 @@ next_generation:
 		bne t0, t1, check_rule_4
 		j rule_3
 		
+		# exploding labyrint 
 		check_rule_4:
+		li t0, 4
+		bne t0, t1, check_rule_5
+		j rule_4
+		
+		check_rule_5:
 		li a4, 0
 		
 		# well shouldn't be possible
@@ -223,6 +229,66 @@ rule_3:
 	j change_bit
 		
 	back_rule_3:
+	lw t0, 0(sp)
+	lw ra, 4(sp)
+	addi sp, sp, 8
+	ret
+
+
+# exploding
+# 1245	G3
+rule_4:
+# a1 x pos of cell
+# a2 y pos of cell
+# input a4 with number of living neighboors
+# return a4 if status bit is set -> change cell status dead/alive
+
+	addi sp, sp, -8
+	sw t0, 0(sp)
+	sw ra, 4(sp)
+	
+	li t0, 3
+	jal ra, get_pixel	# saved in a3
+	
+	beq a4, t0, rule_4_3	# cell gets alive
+	
+	la ra, back_rule_4
+	
+	rule_4_1:
+	li t0, 1
+	beq a4, t0, nochange_bit
+	rule_4_2:
+	li t0, 2
+	beq a4, t0, nochange_bit
+	rule_4_4:
+	li t0, 4
+	beq a4, t0, nochange_bit
+	rule_4_5:
+	li t0, 5
+	beq a4, t0, nochange_bit
+	# well this means no chances
+	# can not relieve dead cells
+	# alive cells can not be dead
+	
+	dead_rule_4:	# not all can survive...now die or stay dead
+	
+	bnez a3, change_bit	# cell dies
+	# well at this point the cell is dead and stays dead
+	j nochange_bit
+	
+	rule_4_3:
+	# after that ra need to be the finished rule so...
+	la ra, back_rule_4
+	
+	li t0, 3
+	bne a4, t0, dead_rule_4
+	
+	# now i need the current status of the cell
+	bnez a3, nochange_bit
+	# this means the cell rebirth
+	j change_bit
+	
+	back_rule_4:
 	lw t0, 0(sp)
 	lw ra, 4(sp)
 	addi sp, sp, 8

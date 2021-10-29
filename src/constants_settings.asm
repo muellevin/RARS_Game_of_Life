@@ -19,7 +19,7 @@
 .eqv MIN_CELL_SIZE 1
 .eqv MAX_CELL_SIZE 16
 
-.eqv MAX_RULE 3	# min rule 1
+.eqv MAX_RULE 4	# min rule 1
 
 .eqv ALIVE 0xa0a397 
 
@@ -36,7 +36,7 @@ ask_y_size_display:
 .string "width of display rars(64; 128; 256; 512)\n"
 
 ask_rule_to_apply:
-.string "which rule do you want tu use min 1 max 3\n"
+.string "which rule do you want tu use min 1 max 4\n"
 
 ask_time_till_next_generation:
 .string "how much time in ms should the programm wait till next generation is shown max 2³²-1\n"
