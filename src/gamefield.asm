@@ -40,7 +40,7 @@ init_gamefield:
 	la a0, return_to_main
 	mv a1, t2	# incase some below function modified them
 	mv a2, t3
-	jal ra, continue_gamefield	# input a1, a2
+	jal ra, next_cell_edge_detection	# input a1, a2
 	mv t2, a1
 	mv t3, a2
 	j init_living_cells
@@ -56,7 +56,7 @@ init_gamefield:
 	ret
 	
 
-continue_gamefield:
+next_cell_edge_detection:
 # input:
 # a0 where to jump if gemfield is finished
 # a1 current x pos
@@ -267,7 +267,7 @@ print_next_generation:
 		#current pos
 		mv a1, t2	
 		mv a2, t3
-		jal ra, continue_gamefield
+		jal ra, next_cell_edge_detection
 		# load coords of next cell
 		mv t2, a1
 		mv t3, a2
@@ -309,7 +309,7 @@ print_black_display:
 	#current pos
 	mv a1, t0
 	mv a2, t1
-	jal ra, continue_gamefield
+	jal ra, next_cell_edge_detection
 	# load coords of next cell
 	mv t0, a1
 	mv t1, a2
@@ -323,4 +323,5 @@ print_black_display:
 	addi sp, sp, 12
 	ret
 	
-	
+
+.include "exercise_solutions/draw_rectangle.asm"

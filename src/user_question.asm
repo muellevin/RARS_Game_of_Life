@@ -310,8 +310,6 @@ invalid_input:
 	li  a7, 4          
 	ecall
 	jr a1
-	
-
 
 
 print:
@@ -322,8 +320,4 @@ print:
 	li  a7, 1          
 	ecall
 	ret 
-	
-	
-	
-end:
-        
+ 

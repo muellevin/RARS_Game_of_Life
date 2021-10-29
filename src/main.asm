@@ -26,6 +26,5 @@ j game_loop
 #ecall
 .include "user_question.asm"
 .include "gamefield.asm"
-.include "exercise_solutions/draw_rectangle.asm"
 .include "rules.asm"
 .include "user_key_interface.asm"

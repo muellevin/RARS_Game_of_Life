@@ -76,7 +76,7 @@ next_generation:
 		#current pos
 		mv a1, t2	
 		mv a2, t3
-		jal ra, continue_gamefield
+		jal ra, next_cell_edge_detection
 		# load coords of next cell
 		mv t2, a1
 		mv t3, a2
