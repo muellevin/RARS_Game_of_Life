@@ -299,11 +299,10 @@ rars_display_sizes:
 	addi sp, sp, 4
 	jr a2
 
-question_colour:
-	
+question_colour:	
 	addi sp, sp, -4
 	sw t0, 0(sp)
-
+	
 	# ask user about color code
 	la a0, ask_colour	
 	li a7, 4
@@ -311,6 +310,8 @@ question_colour:
 
 	li a7, 5	#get colorcode as integer
 	ecall
+	
+	beqz a0, invalid_colour
 
 	# loading setting address
 	la t0, settings
@@ -320,6 +321,13 @@ question_colour:
 	lw t0, 0(sp)
 	addi sp, sp, 4	
 	ret
+	
+	invalid_colour:
+	#resetting t0
+	la a1, question_colour	# jump back to where we start if invalid input
+	lw t0, 0(sp)
+	addi sp, sp, 4
+	j invalid_input
 	
 
 invalid_input:
