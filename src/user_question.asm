@@ -299,6 +299,28 @@ rars_display_sizes:
 	addi sp, sp, 4
 	jr a2
 
+question_colour:
+	
+	addi sp, sp, -4
+	sw t0, 0(sp)
+
+	# ask user about color code
+	la a0, ask_colour	
+	li a7, 4
+	ecall
+
+	li a7, 5	#get colorcode as integer
+	ecall
+
+	# loading setting address
+	la t0, settings
+	sw a0, 32(t0)
+	
+	#resetting t0
+	lw t0, 0(sp)
+	addi sp, sp, 4	
+	ret
+	
 
 invalid_input:
 # a1 is used for the try again jump, you need to la a1, your_label

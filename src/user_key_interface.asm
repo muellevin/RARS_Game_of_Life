@@ -66,10 +66,17 @@ key_listener:
   				
   			switch.black_screen:			# for some rules and (maybe i will add) objects it is good to have a clear screen
   				li t1, 'b'
-  				bne t0, t1 switch.time
+  				bne t0, t1 switch.change_color
   				jal ra, print_black_display
   				j switch.end
   				
+  			switch.change_color:			# for some rules and (maybe i will add) objects it is good to have a clear screen
+  				li t1, 'c'
+  				bne t0, t1 switch.time
+  				jal ra, question_colour
+  				jal ra, print_colour_display
+  				j switch.end
+  			
   			switch.time:			# in case you messed the time really bad
   				li t1, 't'
   				bne t0, t1 switch.finish

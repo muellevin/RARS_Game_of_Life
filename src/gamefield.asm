@@ -33,8 +33,7 @@ init_gamefield:
 	cell_alive:
 		mv a1, t2
 		mv a2, t3
-		li a7, ALIVE	# all living cells are green
-		jal draw_cell
+		jal ra, print_living_cell
 		
 	adding_next_cell:
 	la a0, return_to_main
@@ -323,5 +322,43 @@ print_black_display:
 	addi sp, sp, 12
 	ret
 	
+print_colour_display:
+	addi sp, sp, -12
+	sw t0, 0(sp)
+	sw t1, 4(sp)
+	sw ra, 8(sp)
+
+	li t0, 0	# display start coords
+	li t1, 0	
+	
+	print_trough_colour_display:
+	mv a1, t0
+	mv a2, t1
+	
+	jal ra, get_pixel
+	mv a1, t0
+	mv a2, t1
+	la ra, continue_colour_display
+	bnez a3, print_living_cell
+	
+	continue_colour_display:
+	la a0, print_colour_display_finished	# where to go if gamefield is finished
+	#current pos
+	mv a1, t0
+	mv a2, t1
+	jal ra, next_cell_edge_detection
+	# load coords of next cell
+	mv t0, a1
+	mv t1, a2
+	j print_trough_colour_display
+	
+	
+	print_colour_display_finished:
+	lw t0, 0(sp)
+	lw t1, 4(sp)
+	lw ra, 8(sp)
+	addi sp, sp, 12
+	ret
+
 
 .include "exercise_solutions/draw_rectangle.asm"

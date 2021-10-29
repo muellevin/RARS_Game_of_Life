@@ -21,7 +21,7 @@
 
 .eqv MAX_RULE 4	# min rule 1
 
-.eqv ALIVE 0xa0a397 
+#.eqv ALIVE 0xa0a397 
 
 ask_rars_version:
 .string "are you using fpgrars(any number) or rars(0)\n"
@@ -47,6 +47,9 @@ ask_start_density:
 invalid_input_message:
 .string "Somehow you did not gave the valid input try again\n"
 
+ask_colour:
+.string "What color do you like?\n"
+
 new_line:
 .string "\n"
 
@@ -64,6 +67,8 @@ settings:
 .word 0	# time till next generation will be displayed in ms 0-2³²-1	in unittest i don't want to wait		#addresss by 24
 
 .word 50	# start density	this is random so no UT								#addresss by 28
+
+.word 0xa0a397	# color of living cells				# adress by 32
 
 state_bits:
 .space 32768	# malloc for 512x512Pixel/32Bits of word x 4 addressing
