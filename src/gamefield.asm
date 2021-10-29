@@ -33,14 +33,13 @@ init_gamefield:
 	cell_alive:
 		mv a1, t2
 		mv a2, t3
-		li a7, ALIVE	# all living cells are green
-		jal draw_cell
+		jal ra, print_living_cell
 		
 	adding_next_cell:
 	la a0, return_to_main
 	mv a1, t2	# incase some below function modified them
 	mv a2, t3
-	jal ra, continue_gamefield	# input a1, a2
+	jal ra, next_cell_edge_detection	# input a1, a2
 	mv t2, a1
 	mv t3, a2
 	j init_living_cells
@@ -56,7 +55,7 @@ init_gamefield:
 	ret
 	
 
-continue_gamefield:
+next_cell_edge_detection:
 # input:
 # a0 where to jump if gemfield is finished
 # a1 current x pos
@@ -130,10 +129,12 @@ neighboor_status:
 	
 	la t3, settings
 	lw s0, 0(t3)
+	
+	mv t0, a1	# saving the coords of current cell
+	mv t1, a2
 
 	top_left:
-	mv t0, a1
-	mv t1, a2
+	
 	sub a1, t0, s0
 	sub a2, t1, s0
 	bltz a2, mid_left
@@ -143,13 +144,15 @@ neighboor_status:
 	addi a4, a4, 1
 	
 	top_mid:
-	add a1, a1, s0
+	mv a1, t0
+	sub a2, t1, s0
 	jal ra, get_pixel
 	beqz a3, top_right
 	addi a4, a4, 1
 	
 	top_right:
-	add a1, a1, s0
+	add a1, t0, s0
+	sub a2, t1, s0
 	lw t4, 12(t3)
 	bgeu a1, t4, mid_left
 	jal ra, get_pixel
@@ -166,12 +169,14 @@ neighboor_status:
 	
 	mid_right:
 	add a1, t0, s0
+	mv a2, t1
+	lw t4, 12(t3)
+	bgeu a1, t4, bottom_left
 	jal ra, get_pixel
 	beqz a3, bottom_left
 	addi a4, a4, 1
 	
 	bottom_left:
-	sub a1, t0, s0
 	sub a1, t0, s0
 	add a2, t1, s0
 	lw t4, 16(t3)
@@ -182,13 +187,15 @@ neighboor_status:
 	addi a4, a4, 1
 
 	bottom_mid:
-	add a1, a1, s0
+	mv a1, t0
+	add a2, t1, s0
 	jal ra, get_pixel
 	beqz a3, bottom_right
 	addi a4, a4, 1
 	
 	bottom_right:
-	add a1, a1, s0
+	add a1, t0, s0
+	add a2, t1, s0
 	lw t4, 12(t3)
 	bgeu a1, t4, finish_counting_neighboor
 	jal ra, get_pixel
@@ -259,7 +266,7 @@ print_next_generation:
 		#current pos
 		mv a1, t2	
 		mv a2, t3
-		jal ra, continue_gamefield
+		jal ra, next_cell_edge_detection
 		# load coords of next cell
 		mv t2, a1
 		mv t3, a2
@@ -275,3 +282,83 @@ print_next_generation:
 	lw ra, 20(sp)
 	addi sp, sp, 24
 	ret
+
+# more efficient way to print black screen (reset)
+print_black_display:
+	addi sp, sp, -12
+	sw t0, 0(sp)
+	sw t1, 4(sp)
+	sw ra, 8(sp)
+
+	li t0, 0	# display start coords
+	li t1, 0	
+	
+	print_trough_blacking_display:
+	mv a1, t0
+	mv a2, t1
+	
+	jal ra, get_pixel
+	mv a1, t0
+	mv a2, t1
+	la ra, continue_blacking_display
+	bnez a3, print_dead_cell
+	
+	continue_blacking_display:
+	la a0, print_black_display_finished	# where to go if gamefield is finished
+	#current pos
+	mv a1, t0
+	mv a2, t1
+	jal ra, next_cell_edge_detection
+	# load coords of next cell
+	mv t0, a1
+	mv t1, a2
+	j print_trough_blacking_display
+	
+	
+	print_black_display_finished:
+	lw t0, 0(sp)
+	lw t1, 4(sp)
+	lw ra, 8(sp)
+	addi sp, sp, 12
+	ret
+	
+print_colour_display:
+	addi sp, sp, -12
+	sw t0, 0(sp)
+	sw t1, 4(sp)
+	sw ra, 8(sp)
+
+	li t0, 0	# display start coords
+	li t1, 0	
+	
+	print_trough_colour_display:
+	mv a1, t0
+	mv a2, t1
+	
+	jal ra, get_pixel
+	mv a1, t0
+	mv a2, t1
+	la ra, continue_colour_display
+	bnez a3, print_living_cell
+	
+	continue_colour_display:
+	la a0, print_colour_display_finished	# where to go if gamefield is finished
+	#current pos
+	mv a1, t0
+	mv a2, t1
+	jal ra, next_cell_edge_detection
+	# load coords of next cell
+	mv t0, a1
+	mv t1, a2
+	j print_trough_colour_display
+	
+	
+	print_colour_display_finished:
+	lw t0, 0(sp)
+	lw t1, 4(sp)
+	lw ra, 8(sp)
+	addi sp, sp, 12
+	ret
+
+
+.include "exercise_solutions/draw_rectangle.asm"

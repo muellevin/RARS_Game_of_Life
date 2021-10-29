@@ -1,0 +1,13 @@
+{
+  "cesp_version": 1,
+  "executable": [
+    "/usr/bin/java",
+    "-jar",
+    "/home/cesp/cesp_course/tools/rars/rars.jar"
+  ],
+  "arguments": [
+    "unittest_neighboorCount.asm"
+  ],
+  "description": "counting living neighboors unittest",
+  "expected_result": "RARS 1.5  Copyright 2003-2019 Pete Sanderson and Kenneth Vollmar\n\n3\n3\n5\n5\n5\n8\n3\n3\n\nProgram terminated by calling exit\n"
+}

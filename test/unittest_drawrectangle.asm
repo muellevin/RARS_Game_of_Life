@@ -15,8 +15,8 @@ sw t1, 16(t0)
 
 li a3, 1
 li a4, 1
-li a5, 9
-li a6, 10
+li a5, 8
+li a6, 9
 li a7, 0x00ff00
 jal draw_rectangle
 

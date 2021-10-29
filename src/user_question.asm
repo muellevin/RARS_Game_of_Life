@@ -192,10 +192,10 @@ question_rars_version:
 	sw t1, 8(t0)
 	
 	li t1, FPG_DISPLAY_WIDTH
-	sw t1, 16(t0)
+	sw t1, 12(t0)
 	
 	li t1, FPG_DISPLAY_HEIGHT
-	sw t1, 12(t0)
+	sw t1, 16(t0)
 	
 	# restore t1 and t0
 	lw t1, 4(sp)
@@ -299,6 +299,36 @@ rars_display_sizes:
 	addi sp, sp, 4
 	jr a2
 
+question_colour:	
+	addi sp, sp, -4
+	sw t0, 0(sp)
+	
+	# ask user about color code
+	la a0, ask_colour	
+	li a7, 4
+	ecall
+
+	li a7, 5	#get colorcode as integer
+	ecall
+	
+	beqz a0, invalid_colour
+
+	# loading setting address
+	la t0, settings
+	sw a0, 32(t0)
+	
+	#resetting t0
+	lw t0, 0(sp)
+	addi sp, sp, 4	
+	ret
+	
+	invalid_colour:
+	#resetting t0
+	la a1, question_colour	# jump back to where we start if invalid input
+	lw t0, 0(sp)
+	addi sp, sp, 4
+	j invalid_input
+	
 
 invalid_input:
 # a1 is used for the try again jump, you need to la a1, your_label
@@ -310,8 +340,6 @@ invalid_input:
 	li  a7, 4          
 	ecall
 	jr a1
-	
-
 
 
 print:
@@ -322,8 +350,5 @@ print:
 	li  a7, 1          
 	ecall
 	ret 
-	
-	
-	
+ 
 end:
-        

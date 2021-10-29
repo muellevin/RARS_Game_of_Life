@@ -60,10 +60,23 @@ key_listener:
   				
   			switch.life_rule:
   				li t1, 'l'
-  				bne t0, t1 switch.time
+  				bne t0, t1 switch.black_screen
   				jal ra, question_rule
   				j switch.end
   				
+  			switch.black_screen:			# for some rules and (maybe i will add) objects it is good to have a clear screen
+  				li t1, 'b'
+  				bne t0, t1 switch.change_color
+  				jal ra, print_black_display
+  				j switch.end
+  				
+  			switch.change_color:			# for some rules and (maybe i will add) objects it is good to have a clear screen
+  				li t1, 'c'
+  				bne t0, t1 switch.time
+  				jal ra, question_colour
+  				jal ra, print_colour_display
+  				j switch.end
+  			
   			switch.time:			# in case you messed the time really bad
   				li t1, 't'
   				bne t0, t1 switch.finish
@@ -105,14 +118,8 @@ reset:
 	
 	la t0, settings
 	
-	#might advance that later...
 	#reset display:
-	li a3, 0
-	li a4, 0
-	lw a5, 12(t0)
-	lw a6, 16(t0)
-	li a7, 0
-	jal ra, draw_rectangle	# make the display black
+	jal ra, print_black_display
 	
 	jal ra, question_cell_size
 	

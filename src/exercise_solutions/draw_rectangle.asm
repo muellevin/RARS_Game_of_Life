@@ -107,14 +107,17 @@ print_living_cell:
 # input
 # a1 x cell pos
 # a2 y cell pos
-	addi sp, sp, -4
+	addi sp, sp, -8
 	sw ra, 0(sp)
-
-	li a7, ALIVE	# dead cell
+	sw t0, 4(sp)
+	
+	la t0, settings
+	lw a7, 32(t0)		# color of living cell
 	jal ra, draw_cell
 	
 	lw ra, 0(sp)
-	addi sp, sp, 4
+	lw t0, 4(sp)
+	addi sp, sp, 8
 	ret
 
 .include "draw_pixel.asm"
