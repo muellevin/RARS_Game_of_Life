@@ -85,63 +85,63 @@ li a1, 0
 li a2, 0
 li a4, 0	
 jal ra, rule_2
-bnez a4, errorcode	#-> living should stay alive
+beqz a4, errorcode	#-> living should stay alive
 jal ra, print_succes
 
 li a1, 0	
 li a2, 0	
 li a4, 1	
 jal ra, rule_2
-bnez a4, errorcode	#->living should stay alive
+beqz a4, errorcode	#->living should stay alive
 jal ra, print_succes
 
 li a1, 0	
 li a2, 0	
 li a4, 2	
 jal ra, rule_2
-bnez a4, errorcode	#-> living should stay living
+beqz a4, errorcode	#-> living should stay living
 jal ra, print_succes
 
 li a1, 0	
 li a2, 0	
 li a4, 3
 jal ra, rule_2
-bnez a4, errorcode	#-> living should living
+beqz a4, errorcode	#-> living should living
 jal ra, print_succes
 
 li a1, 0	
 li a2, 0	
 li a4, 4	
 jal ra, rule_2
-bnez a4, errorcode	#-> living should stay alive
+beqz a4, errorcode	#-> living should stay alive
 jal ra, print_succes
 
 li a1, 0	
 li a2, 0	
 li a4, 5	
 jal ra, rule_2
-beqz a4, errorcode	#-> living should die
+bnez a4, errorcode	#-> living should die
 jal ra, print_succes
 
 li a1, 0	
 li a2, 0	
 li a4, 6
 jal ra, rule_2
-bnez a4, errorcode	#-> living should stay alive
+beqz a4, errorcode	#-> living should stay alive
 jal ra, print_succes
 
 li a1, 0	
 li a2, 0	
 li a4, 7	
 jal ra, rule_2
-bnez a4, errorcode	#-> living should stay alive
+beqz a4, errorcode	#-> living should stay alive
 jal ra, print_succes
 
 li a1, 0	
 li a2, 0	
 li a4, 8
 jal ra, rule_2
-bnez a4, errorcode	#-> living should stay alive
+beqz a4, errorcode	#-> living should stay alive
 jal ra, print_succes
 
 

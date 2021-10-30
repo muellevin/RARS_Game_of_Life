@@ -69,13 +69,29 @@ draw_cell:
 # a2 y cell pos
 # inderekt a7 -> color
 
-	addi sp, sp, -8
+	addi sp, sp, -12
 	sw t0, 0(sp)
-	sw ra, 4(sp)
+	sw t1, 4(sp)
+	sw ra, 8(sp)
 	
 	la t0, settings
-	lw t0, 0(t0)
+	lw t0, 0(t0)		# cell size
+	li t1, 1
 	
+	bne t0, t1, draw_cell_rectangle		# less instruction -> faster print
+	
+	## but the simulated display reacts on sw -> need alot more time so...
+	#jal ra, get_pixel
+	#beq a3, a7, draw_cell_finished		# if the color is the same i do not need to draw anything
+	
+	mv a3, a7
+	jal ra, draw_pixel			# since draw/get pixel have nearly the same instruction it doesn' even matter
+	j draw_cell_finished
+	
+	
+	draw_cell_rectangle:
+	jal ra, get_pixel
+	beq a3, a7, draw_cell_finished		# if the color is the same i do not need to draw anything
 	mv a3, a1
 	mv a4, a2
 	add a5, a1, t0	# here would be already the next cell so -1
@@ -83,10 +99,12 @@ draw_cell:
 	addi a5, a5, -1
 	addi a6, a6, -1
 	jal ra, draw_rectangle
-
+	
+	draw_cell_finished:
 	lw t0, 0(sp)
-	lw ra, 4(sp)
-	addi sp, sp, 8
+	lw t1, 4(sp)
+	lw ra, 8(sp)
+	addi sp, sp, 12
 ret
 
 print_dead_cell:

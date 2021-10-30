@@ -116,6 +116,7 @@ neighboor_status:
 # a1 your cell x
 # a2 your cell y
 # return a4 living neighboor count
+# i would need 2 for loops and everytime both edge detections -> more instructions 
 
 	li a4, 0	# count living cells
 	addi sp, sp, -28
@@ -128,78 +129,82 @@ neighboor_status:
 	sw s0, 24(sp)
 	
 	la t3, settings
-	lw s0, 0(t3)
+	lw s0, 0(t3)		# i need the cell size to check if the next cell would be out of range
 	
-	mv t0, a1	# saving the coords of current cell
+	mv t0, a1		# saving the coords of current cell
 	mv t1, a2
 
 	top_left:
 	
-	sub a1, t0, s0
-	sub a2, t1, s0
-	bltz a2, mid_left
-	bltz a1, top_mid
+	sub a1, t0, s0		# left from current
+	sub a2, t1, s0		# row over current
+	
+	bltz a2, mid_left	# if less than 0 (top row) than go directly to mid row
+	bltz a1, top_mid	# when cell is on left edge jump to mid top
 	jal ra, get_pixel
-	beqz a3, top_mid
+	beqz a3, top_mid	# 0 == death -> no count
 	addi a4, a4, 1
 	
 	top_mid:
-	mv a1, t0
-	sub a2, t1, s0
+	mv a1, t0		# same x coord as current
+	# sub a2, t1, s0	# still one row over current (already checked)
+	# this means the cell must exist
 	jal ra, get_pixel
-	beqz a3, top_right
+	beqz a3, top_right	# 0 == death -> no count
 	addi a4, a4, 1
 	
 	top_right:
-	add a1, t0, s0
-	sub a2, t1, s0
-	lw t4, 12(t3)
-	bgeu a1, t4, mid_left
+	add a1, t0, s0		# right from current
+	# sub a2, t1, s0	# still one row over current (already checked)
+	
+	lw t4, 12(t3)		# need to get the gamefield widht
+	bgeu a1, t4, mid_left	# when the cell is on edge go to mid_left
 	jal ra, get_pixel
-	beqz a3, mid_left
+	beqz a3, mid_left	# 0 == death -> no count
 	addi a4, a4, 1
 	
 	mid_left:
-	sub a1, t0, s0
-	mv a2, t1
-	bltz a1, mid_right
+	sub a1, t0, s0		# left from current
+	mv a2, t1		# same row as current -> row must exist
+	bltz a1, mid_right	# left edge
 	jal ra, get_pixel
-	beqz a3, mid_right
+	beqz a3, mid_right	# 0 == death -> no count
 	addi a4, a4, 1
 	
 	mid_right:
-	add a1, t0, s0
-	mv a2, t1
-	lw t4, 12(t3)
-	bgeu a1, t4, bottom_left
+	add a1, t0, s0		# right from current
+	#mv a2, t1		# same row as current -> row must exist
+	lw t4, 12(t3)		# need to get the gamefield widht
+	bgeu a1, t4, bottom_left# right edge
 	jal ra, get_pixel
-	beqz a3, bottom_left
+	beqz a3, bottom_left	# 0 == death -> no count
 	addi a4, a4, 1
 	
 	bottom_left:
-	sub a1, t0, s0
-	add a2, t1, s0
-	lw t4, 16(t3)
-	bgeu a2, t4, finish_counting_neighboor
-	bltz a1, bottom_mid
+	sub a1, t0, s0		# left from current
+	add a2, t1, s0		# row below current
+	
+	lw t4, 16(t3)				# i need gamefield height
+	bgeu a2, t4, finish_counting_neighboor	# bottom edge -> no more cells -> finish
+	bltz a1, bottom_mid			# left edge -> go to next cell -> row must exist
 	jal ra, get_pixel
-	beqz a3, bottom_mid
+	beqz a3, bottom_mid	# 0 == death -> no count
 	addi a4, a4, 1
 
 	bottom_mid:
 	mv a1, t0
-	add a2, t1, s0
+	#add a2, t1, s0		# row below current
 	jal ra, get_pixel
-	beqz a3, bottom_right
+	beqz a3, bottom_right	# 0 == death -> no count
 	addi a4, a4, 1
 	
 	bottom_right:
-	add a1, t0, s0
-	add a2, t1, s0
-	lw t4, 12(t3)
-	bgeu a1, t4, finish_counting_neighboor
+	add a1, t0, s0		# right from current
+	#add a2, t1, s0		# row below current
+	lw t4, 12(t3)		# right edge detection
+	bgeu a1, t4, finish_counting_neighboor		
 	jal ra, get_pixel
-	beqz a3, finish_counting_neighboor
+	beqz a3, finish_counting_neighboor	# 0 == death -> no count
 	addi a4, a4, 1
 	
 	finish_counting_neighboor:
@@ -241,16 +246,10 @@ print_next_generation:
 		get_status_bit:
 		srl a4, s1, s2		# getting cell status
 		andi a4, a4, 1		# only single bit is needed
-
-		beqz a4, continue_print_gamefiled
 		
-		# i already have my cell coords::
-		jal ra, get_pixel
 		la ra, continue_print_gamefiled
-		
-		bnez a3, print_dead_cell
+		beqz a4, print_dead_cell
 		j print_living_cell
-		
 		
 		continue_print_gamefiled:
 		addi s2, s2, -1
@@ -297,11 +296,7 @@ print_black_display:
 	mv a1, t0
 	mv a2, t1
 	
-	jal ra, get_pixel
-	mv a1, t0
-	mv a2, t1
-	la ra, continue_blacking_display
-	bnez a3, print_dead_cell
+	jal ra, print_dead_cell
 	
 	continue_blacking_display:
 	la a0, print_black_display_finished	# where to go if gamefield is finished
@@ -316,44 +311,6 @@ print_black_display:
 	
 	
 	print_black_display_finished:
-	lw t0, 0(sp)
-	lw t1, 4(sp)
-	lw ra, 8(sp)
-	addi sp, sp, 12
-	ret
-	
-print_colour_display:
-	addi sp, sp, -12
-	sw t0, 0(sp)
-	sw t1, 4(sp)
-	sw ra, 8(sp)
-
-	li t0, 0	# display start coords
-	li t1, 0	
-	
-	print_trough_colour_display:
-	mv a1, t0
-	mv a2, t1
-	
-	jal ra, get_pixel
-	mv a1, t0
-	mv a2, t1
-	la ra, continue_colour_display
-	bnez a3, print_living_cell
-	
-	continue_colour_display:
-	la a0, print_colour_display_finished	# where to go if gamefield is finished
-	#current pos
-	mv a1, t0
-	mv a2, t1
-	jal ra, next_cell_edge_detection
-	# load coords of next cell
-	mv t0, a1
-	mv t1, a2
-	j print_trough_colour_display
-	
-	
-	print_colour_display_finished:
 	lw t0, 0(sp)
 	lw t1, 4(sp)
 	lw ra, 8(sp)

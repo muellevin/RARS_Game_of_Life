@@ -13,7 +13,7 @@ key_listener:
 
 
 	la s0, settings
-	lw s1, 8(t0)
+	lw s1, 8(s0)
 
 	# using t2 as pause loop
 	li t2, 0
@@ -73,8 +73,7 @@ key_listener:
   			switch.change_color:			# for some rules and (maybe i will add) objects it is good to have a clear screen
   				li t1, 'c'
   				bne t0, t1 switch.time
-  				jal ra, question_colour
-  				jal ra, print_colour_display
+  				jal ra, question_colour		# new colour will be drawn in next generation
   				j switch.end
   			
   			switch.time:			# in case you messed the time really bad

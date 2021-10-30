@@ -43,12 +43,12 @@ next_generation:
 		li t0, 2
 		beq t0, t1, rule_2
 		
-		# copy 
+		# exploding labyrint 
 		li t0, 3
 		bne t0, t1, rule_3
 
 		
-		# exploding labyrint 
+		# copy
 		li t0, 4
 		bne t0, t1, rule_4
 		
@@ -111,35 +111,23 @@ rule_1:
 	addi sp, sp, -8
 	sw t0, 0(sp)
 	sw ra, 4(sp)
-	
-	li t0, 2
-	bne a4, t0, rule_1_3
-	# well this means no chances
-	# can not relieve dead cells
-	# alive cells can not be dead
-	jal ra, nochange_bit	# ra is not set to finish yet
-	j back_rule_1
-	
-	rule_1_3:
 	jal ra, get_pixel	# return color code in a3 -> status of cell
-	# i need the status for the other rules so i am calling it now
 	
 	# after that ra need to be the finished rule so...
 	la ra, back_rule_1
 	
+	li t0, 2
+	bne a4, t0, rule_1_3
+	bnez a3, alive_bit
+	j noalive_bit
+	# well this means no chances
+	# can not relieve dead cells
+	# alive cells can not be dead
+
+	rule_1_3:
 	li t0, 3
-	bne a4, t0, dead_rule_1
-	
-	# now i need the current status of the cell
-	bnez a3, nochange_bit
-	# this means the cell rebirth
-	j change_bit
-	
-	dead_rule_1:	# not all can survive...now die or stay dead
-	
-	bnez a3, change_bit	# cell dies
-	# well at this point the cell is dead and stays dead
-	j nochange_bit
+	bne a4, t0, noalive_bit	# well if it is not 2 or 3 it is dead
+	j alive_bit
 	
 	back_rule_1:
 	lw t0, 0(sp)
@@ -147,7 +135,7 @@ rule_1:
 	addi sp, sp, 8
 	ret
 
-# aanti conways
+# anti conways
 rule_2:
 # a1 x pos of cell
 # a2 y pos of cell
@@ -158,34 +146,23 @@ rule_2:
 	sw t0, 0(sp)
 	sw ra, 4(sp)
 	
+	jal ra, get_pixel	# return color code in a3 -> status of cell
+	
+	# after that ra need to be the finished rule so...
+	la ra, back_rule_2
+	
 	li t0, 6
 	bne a4, t0, rule_2_5
 	# well this means no chances
 	# can not relieve dead cells
 	# alive cells can not be dead
-	jal ra, nochange_bit	# ra is not set to finish yet
-	j back_rule_2
+	bnez a3, alive_bit
+	j noalive_bit
 	
-	rule_2_5:
-	jal ra, get_pixel	# return color code in a3 -> status of cell
-	# i need the status for the other rules so i am calling it now
-	
-	# after that ra need to be the finished rule so...
-	la ra, back_rule_2
-	
+	rule_2_5:	
 	li t0, 5
-	bne a4, t0, alive_rule_2
-	
-	# now i need the current status of the cell
-	bnez a3, change_bit
-	# this means the cell dies
-	j nochange_bit
-	
-	alive_rule_2:	# not all can stay dead
-	
-	bnez a3, nochange_bit	# cell stay alive
-	# well at this point the cell is dead and get to be a living beeing
-	j change_bit
+	bne a4, t0, alive_bit	# if not 5 it is alive
+	j noalive_bit
 	
 	back_rule_2:
 	lw t0, 0(sp)
@@ -194,7 +171,7 @@ rule_2:
 	ret
 
 
-# copy world
+# labyrinth
 rule_3:
 # a1 x pos of cell
 # a2 y pos of cell
@@ -205,23 +182,14 @@ rule_3:
 	sw t0, 0(sp)
 	sw ra, 4(sp)
 	
-	jal ra, get_pixel	# return color code in a3 -> status of cell
 	# after that ra need to be the finished rule so...
 	la ra, back_rule_3
 	
 	li t0, 2	# when a4%2=1 cell set alive else die
 	remu t0, a4, t0
-	bnez t0, rule_3_alive	# cell is to set alive or stay alive
-	
+	bnez t0, alive_bit	# cell is to set alive or stay alive
+	j noalive_bit
 	# the cell is dead
-	bnez a3, change_bit	#cell is alive but should die now
-	# cell si deead and stays dead
-	j nochange_bit
-	
-	rule_3_alive:
-	bnez a3, nochange_bit	# cell is alive and stay alive
-	# cell is dead and should be alive now
-	j change_bit
 		
 	back_rule_3:
 	lw t0, 0(sp)
@@ -230,8 +198,8 @@ rule_3:
 	ret
 
 
-# exploding
-# 1245	G3
+
+# copy
 rule_4:
 # a1 x pos of cell
 # a2 y pos of cell
@@ -242,46 +210,23 @@ rule_4:
 	sw t0, 0(sp)
 	sw ra, 4(sp)
 	
-	li t0, 3
 	jal ra, get_pixel	# saved in a3
-	
-	beq a4, t0, rule_4_3	# cell gets alive
-	
-	la ra, back_rule_4
-	
-	rule_4_1:
-	li t0, 1
-	beq a4, t0, nochange_bit
-	rule_4_2:
-	li t0, 2
-	beq a4, t0, nochange_bit
-	rule_4_4:
-	li t0, 4
-	beq a4, t0, nochange_bit
-	rule_4_5:
-	li t0, 5
-	beq a4, t0, nochange_bit
-	# well this means no chances
-	# can not relieve dead cells
-	# alive cells can not be dead
-	
-	dead_rule_4:	# not all can survive...now die or stay dead
-	
-	bnez a3, change_bit	# cell dies
-	# well at this point the cell is dead and stays dead
-	j nochange_bit
-	
-	rule_4_3:
-	# after that ra need to be the finished rule so...
 	la ra, back_rule_4
 	
 	li t0, 3
-	bne a4, t0, dead_rule_4
+	beq a4, t0, alive_bit	# cell gets alive
 	
-	# now i need the current status of the cell
-	bnez a3, nochange_bit
-	# this means the cell rebirth
-	j change_bit
+	bnez a4, rule_4_6
+	j noalive_bit
+	
+	rule_4_6:
+	li t0, 6
+	bltu a4, t0, rule_4_stay
+	j noalive_bit
+	
+	rule_4_stay:
+	bnez a3, alive_bit
+	j noalive_bit
 	
 	back_rule_4:
 	lw t0, 0(sp)
@@ -290,10 +235,10 @@ rule_4:
 	ret
 
 
-change_bit:
+alive_bit:
 li a4, 1
 ret
 
-nochange_bit:
+noalive_bit:
 li a4, 0
 ret
