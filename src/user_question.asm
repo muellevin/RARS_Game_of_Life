@@ -146,7 +146,7 @@ question_start_density:
 	ecall
 	
 	# now checkingg if the input was valid
-	li t0, 10		# lower would be boring
+	li t0, 0		# lower would be boring
 	blt a0, t0, invalid_density
 	li t0, 100
 	bgt a0, t0, invalid_density
@@ -330,6 +330,140 @@ question_colour:
 	j invalid_input
 	
 
+question_object:
+# questioning which object you want to draw and where
+	addi sp, sp, -8
+	sw t0, 0(sp)
+	sw ra, 4(sp)
+	
+	# ask user about density
+	la a0, ask_object	
+	li a7, 4
+	ecall
+	
+	li a7, 5	#get object input as integer
+	ecall
+	
+	# now checkingg if the input was valid
+	li t0, 1
+	blt a0, t0, invalid_object
+	bne a0, t0, smiley_object
+	la a3, glider
+	j finished_question_object
+	
+	smiley_object:
+	li t0, 2
+	bne a0, t0, invalid_object
+	la a3, smiley
+	
+	finished_question_object:
+	jal ra, question_object_pos	# returning pos on a1;a2
+	jal ra, draw_object
+	#resetting t0|ra
+	lw t0, 0(sp)
+	lw ra, 4(sp)
+	addi sp, sp, 8	
+	ret
+	
+	invalid_object:
+	la a1, question_object	# jump back to where we start if invalid input
+	#resetting t0
+	lw t0, 0(sp)
+	addi sp, sp, 4
+	j invalid_input
+	
+
+question_object_pos:
+# input a3 adress of object
+	addi sp, sp, -28
+	sw s0, 0(sp)
+	sw s1, 4(sp)
+	sw t0, 8(sp)
+	sw t1, 12(sp)
+	sw t2, 16(sp)
+	sw t3, 20(sp)
+	sw ra, 24(sp)
+	
+	
+	jal ra, get_object_size		# return a1|a2 with widht and height
+	mv t0, a1			# securing widht and height
+	#addi t0, t0, -1
+	mv t1, a2
+	#addi t1, t1, -1
+	
+	la s0, settings			# i need gamefield size and cell size
+	lw s1, 0(s0)			# cell size
+	lw t3, 12(s0)			# widht
+	
+	
+	la a0, ask_object_x_pos	
+	li a7, 4
+	ecall
+	
+	sub t3, t3, s1			# last row|right edge cell
+	div t3, t3, s1			# max cells before edge
+	sub t3, t3, t0			# input cells
+	mv a0, t3
+	jal ra, print
+	jal ra, print_new_line
+	
+	li a7, 5	#get object input as integer
+	ecall
+	
+	bltz a0, invalid_object_pos
+	bgt a0, t3, invalid_object_pos
+	mv t0, a0			# saving correct x pos
+	
+	# else asking y
+	lw t3, 16(s0)			# height
+	
+	mul t4, s1, t0			# max value to the bottom side
+	
+	la a0, ask_object_y_pos	
+	li a7, 4
+	ecall
+	
+	sub t3, t3, s1			# last row|right edge cell
+	div t3, t3, s1			# max cells before edge
+	sub t3, t3, t1			# object cell height
+	mv a0, t3
+	jal ra, print
+	jal ra, print_new_line
+	
+	li a7, 5	#get object input as integer
+	ecall
+	
+	bltz a0, invalid_object_pos
+	bgt a0, t3, invalid_object_pos
+	mv t1, a0			# saving correct y pos
+	
+	mv a1, t0		# writing in output adress
+	mv a2, t1
+	lw s0, 0(sp)
+	lw s1, 4(sp)
+	lw t0, 8(sp)
+	lw t1, 12(sp)
+	lw t2, 16(sp)
+	lw t3, 20(sp)
+	lw ra, 24(sp)
+	addi sp, sp, 28
+	
+	ret
+	
+	invalid_object_pos:
+	la a1, question_object_pos
+	
+	lw s0, 0(sp)
+	lw s1, 4(sp)
+	lw t0, 8(sp)
+	lw t1, 12(sp)
+	lw t2, 16(sp)
+	lw t3, 20(sp)
+	lw ra, 24(sp)
+	addi sp, sp, 28
+	j invalid_input
+
+
 invalid_input:
 # a1 is used for the try again jump, you need to la a1, your_label
 # a0 will print the message
@@ -350,5 +484,11 @@ print:
 	li  a7, 1          
 	ecall
 	ret 
- 
+
+print_new_line:
+	# new line
+	la a0, new_line
+	li  a7, 4          
+	ecall
+	ret
 end:
