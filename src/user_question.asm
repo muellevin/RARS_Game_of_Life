@@ -387,9 +387,9 @@ question_object_pos:
 	
 	jal ra, get_object_size		# return a1|a2 with widht and height
 	mv t0, a1			# securing widht and height
-	addi t0, t0, -1
+	#addi t0, t0, -1
 	mv t1, a2
-	addi t1, t1, -1
+	#addi t1, t1, -1
 	
 	la s0, settings			# i need gamefield size and cell size
 	lw s1, 0(s0)			# cell size
@@ -400,8 +400,9 @@ question_object_pos:
 	li a7, 4
 	ecall
 	
+	sub t3, t3, s1			# last row|right edge cell
 	div t3, t3, s1			# max cells before edge
-	sub t3, t3, t0
+	sub t3, t3, t0			# input cells
 	mv a0, t3
 	jal ra, print
 	jal ra, print_new_line
@@ -422,8 +423,9 @@ question_object_pos:
 	li a7, 4
 	ecall
 	
+	sub t3, t3, s1			# last row|right edge cell
 	div t3, t3, s1			# max cells before edge
-	sub t3, t3, t1
+	sub t3, t3, t1			# object cell height
 	mv a0, t3
 	jal ra, print
 	jal ra, print_new_line
