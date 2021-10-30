@@ -4,6 +4,10 @@
 
 .space 1048576	# Addressing for 512x512 Display addresses -> bug at 0x1040...
 # it is disgusting but i guess the easiest solution for now
+state_bits:
+.space 32768	# malloc for 512x512Pixel/32Bits of word x 4 addressing
+# it is disgusting but i guess the easiest solution for now
+
 .eqv FPG_DISPLAY_ADDRESS 0xFF000000
 .eqv FPG_DISPLAY_WIDTH 320
 .eqv FPG_DISPLAY_HEIGHT 240
@@ -19,7 +23,9 @@
 .eqv MIN_CELL_SIZE 1
 .eqv MAX_CELL_SIZE 16
 
-.eqv MAX_RULE 4	# min rule 1
+.eqv MAX_RULE 4		# min rule 1
+
+.eqv MAX_OBJECT 2	# min is 1
 
 #.eqv ALIVE 0xa0a397 
 
@@ -39,16 +45,25 @@ ask_rule_to_apply:
 .string "which rule do you want tu use min 1 max 4\n"
 
 ask_time_till_next_generation:
-.string "how much time in ms should the programm wait till next generation is shown max 2³²-1\n"
+.string "how much time in ms should the programm wait till next generation is shown max 100000\n"
 
 ask_start_density:
-.string "Density of living cells when starting Game of Life (10-100)%\n"
-
-invalid_input_message:
-.string "Somehow you did not gave the valid input try again\n"
+.string "Density of living cells when starting Game of Life (0-100)%\n"
 
 ask_colour:
 .string "What color do you like?\n"
+
+ask_object:
+.string "Which object do you want? max 2\n"
+
+ask_object_x_pos:
+.string "Which x position (cell)?\n MAX:\t"
+
+ask_object_y_pos:
+.string "Which y position (cell)?\n MAX:\t"
+
+invalid_input_message:
+.string "Somehow you did not gave the valid input try again\n"
 
 new_line:
 .string "\n"
@@ -70,8 +85,15 @@ settings:
 
 .word 0xa0a397	# color of living cells				# adress by 32
 
-state_bits:
-.space 32768	# malloc for 512x512Pixel/32Bits of word x 4 addressing
-# it is disgusting but i guess the easiest solution for now
+glider:
+.word 0x00030003	# 16BIt height| 16 bit widht
+.word 0x35800000	# expression of glider status 001|101|011 -> 3x3 cells needed
+
+smiley:
+.word 0x00080009
+.word 0x3E20A530
+.word 0x1A2CE504
+.word 0x7c000000
+
 
 .text

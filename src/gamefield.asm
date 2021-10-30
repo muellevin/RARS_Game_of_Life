@@ -27,7 +27,7 @@ init_gamefield:
 	mv a1, t2
 	mv a2, t3
 	rand
-	ble a0, t1, cell_alive
+	blt a0, t1, cell_alive
 	j adding_next_cell
 	
 	cell_alive:

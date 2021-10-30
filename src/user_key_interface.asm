@@ -79,8 +79,14 @@ key_listener:
   			
   			switch.time:			# in case you messed the time really bad
   				li t1, 't'
-  				bne t0, t1 switch.finish
+  				bne t0, t1 switch.object
   				jal ra, question_time
+  				j switch.end
+  			
+  			switch.object:			# in case you messed the time really bad
+  				li t1, 'o'
+  				bne t0, t1 switch.finish
+  				jal ra, question_object
   				j switch.end
   			
   			switch.finish:
