@@ -27,13 +27,15 @@ state_bits:
 
 .eqv MAX_OBJECT 2	# min is 1
 
+.eqv MAX_TIME_DELAY 100000	# min is obviosly 0
+
 #.eqv ALIVE 0xa0a397 
 
 ask_rars_version:
 .string "are you using fpgrars(any number) or rars(0)\n"
 
 ask_cell_size:
-.string "Size of cells min 1 max 16\n"
+.string "Size of cells min 1 max "
 
 ask_x_size_display:
 .string "height of display rars(64; 128; 256; 512)\n"
@@ -42,10 +44,10 @@ ask_y_size_display:
 .string "width of display rars(64; 128; 256; 512)\n"
 
 ask_rule_to_apply:
-.string "which rule do you want tu use min 1 max 4\n"
+.string "which rule do you want tu use min 1 max "
 
 ask_time_till_next_generation:
-.string "how much time in ms should the programm wait till next generation is shown max 100000\n"
+.string "how much time in ms should the programm wait till next generation is shown max "
 
 ask_start_density:
 .string "Density of living cells when starting Game of Life (0-100)%\n"
@@ -54,7 +56,7 @@ ask_colour:
 .string "What color do you like?\n"
 
 ask_object:
-.string "Which object do you want? max 2\n"
+.string "Which object do you want? MAX: \t"
 
 ask_object_x_pos:
 .string "Which x position (cell)?\n MAX:\t"

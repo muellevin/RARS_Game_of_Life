@@ -25,8 +25,9 @@ ret
 
 question_cell_size:
 	
-	addi sp, sp, -4
+	addi sp, sp, -8
 	sw t0, 0(sp)
+	sw ra, 4(sp)
 	
 	la a1, question_cell_size	# jump back to where we start if invalid input
 
@@ -34,6 +35,10 @@ question_cell_size:
 	la a0, ask_cell_size	
 	li a7, 4
 	ecall
+	
+	li a0, MAX_CELL_SIZE	#  print maximum cells in pixel
+	jal ra, print
+	jal ra, print_new_line
 
 	li a7, 5	#get size input as integer
 	ecall
@@ -50,20 +55,23 @@ question_cell_size:
 	
 	#resetting t0
 	lw t0, 0(sp)
-	addi sp, sp, 4	
+	lw ra, 4(sp)
+	addi sp, sp, 8
 	ret
 	
 	invalid_cell_size:
 	#resetting t0
 	lw t0, 0(sp)
-	addi sp, sp, 4
+	lw ra, 4(sp)
+	addi sp, sp, 8
 	j invalid_input
 
 
 question_rule:
 
-	addi sp, sp, -4
+	addi sp, sp, -8
 	sw t0, 0(sp)
+	sw ra, 4(sp)
 
 	la a1, question_rule	# jump back to where we start if invalid input
 
@@ -71,6 +79,10 @@ question_rule:
 	la a0, ask_rule_to_apply	
 	li a7, 4
 	ecall
+	
+	li a0, MAX_RULE	#  print maximum of usable rules
+	jal ra, print
+	jal ra, print_new_line
 
 	li a7, 5	#get size input as integer
 	ecall
@@ -87,19 +99,22 @@ question_rule:
 	
 	#resetting t0
 	lw t0, 0(sp)
-	addi sp, sp, 4	
+	lw ra, 4(sp)
+	addi sp, sp, 8
 	ret
 	
 	invalid_rule:
 	#resetting t0
 	lw t0, 0(sp)
-	addi sp, sp, 4
+	lw ra, 4(sp)
+	addi sp, sp, 8
 	j invalid_input
 
 question_time:
 
-	addi sp, sp, -4
+	addi sp, sp, -8
 	sw t0, 0(sp)
+	sw ra, 4(sp)
 	
 	la a1, question_time	# jump back to where we start if invalid input
 	# ask user about time till next generation should be rendered
@@ -107,11 +122,15 @@ question_time:
 	li a7, 4
 	ecall
 	
+	li a0, MAX_TIME_DELAY	#  print maximum of usable objects
+	jal ra, print
+	jal ra, print_new_line
+	
 	# here we will accept anything
 	li a7, 5	#get time input as integer
 	ecall
 	
-	li t0, 100000		# i am setting a limit because inever want to see someone wait 7,101467089947 weeks??!
+	li t0, MAX_TIME_DELAY		# i am setting a limit because inever want to see someone wait 7,101467089947 weeks??!
 	bgt a0, t0, invalid_time
 	
 	# loading setting address
@@ -120,13 +139,15 @@ question_time:
 	
 	#resetting t0
 	lw t0, 0(sp)
-	addi sp, sp, 4	
+	lw ra, 4(sp)
+	addi sp, sp, 8
 	ret
 	
 	invalid_time:
 	#resetting t0
 	lw t0, 0(sp)
-	addi sp, sp, 4
+	lw ra, 4(sp)
+	addi sp, sp, 8
 	j invalid_input
 
 
@@ -341,23 +362,37 @@ question_object:
 	li a7, 4
 	ecall
 	
+	li a0, MAX_OBJECT	#  print maximum of usable objects
+	jal ra, print
+	jal ra, print_new_line
+	
 	li a7, 5	#get object input as integer
 	ecall
 	
 	# now checkingg if the input was valid
+	beqz a0, invalid_object
+	
+	li t0, MAX_OBJECT
+	bgtu a0, t0, invalid_object
+	
+	
 	li t0, 1
-	blt a0, t0, invalid_object
-	bne a0, t0, smiley_object
-	la a3, glider
+	beq a0, t0, glider_object
+	
+	li t0, 2
+	beq a0, t0, smiley_object
+
+	
+	glider_object:
+	la a3, glider			# load adress of object to print
 	j finished_question_object
 	
 	smiley_object:
-	li t0, 2
-	bne a0, t0, invalid_object
-	la a3, smiley
+	la a3, smiley			# load adress of object to print
+	j finished_question_object
 	
 	finished_question_object:
-	jal ra, question_object_pos	# returning pos on a1;a2
+	jal ra, question_object_pos	# returning pos on a1;a2 # not using a3 there so i do not need to save it
 	jal ra, draw_object
 	#resetting t0|ra
 	lw t0, 0(sp)

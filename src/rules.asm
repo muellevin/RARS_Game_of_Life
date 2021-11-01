@@ -31,11 +31,11 @@ next_generation:
 		mv a1, t2
 		mv a2, t3
 		
+		la ra, set_status_bit	# directly jump there instead jump in here again
+		
+		# normal conway
 		li t0, 1	# min rule == 1
 		# now the magic begins
-		
-		la ra, set_status_bit	# directly jump there instead jump in here again
-		# normal conway
 		beq t0, t1, rule_1
 		# returning status bit -->1 -> change status (dead -> alive; alive ->dead)
 
@@ -43,17 +43,17 @@ next_generation:
 		li t0, 2
 		beq t0, t1, rule_2
 		
-		# exploding labyrint 
+		# copy
 		li t0, 3
-		bne t0, t1, rule_3
+		beq t0, t1, rule_3
 
 		
-		# copy
+		# exploding labyrint 
 		li t0, 4
-		bne t0, t1, rule_4
+		beq t0, t1, rule_4
 		
 		# not possible
-		li a4, 0
+		li a4, 0	# to make sure "freeze" the gamefield before things go wrong
 		
 		# well shouldn't be possible
 		## switch rule call a4 -> next status of current cell is a4 as well	
@@ -119,14 +119,14 @@ rule_1:
 	li t0, 2
 	bne a4, t0, rule_1_3
 	bnez a3, alive_bit
-	j noalive_bit
+	j not_alive_bit
 	# well this means no chances
 	# can not relieve dead cells
 	# alive cells can not be dead
 
 	rule_1_3:
 	li t0, 3
-	bne a4, t0, noalive_bit	# well if it is not 2 or 3 it is dead
+	bne a4, t0, not_alive_bit	# well if it is not 2 or 3 it is dead
 	j alive_bit
 	
 	back_rule_1:
@@ -157,12 +157,12 @@ rule_2:
 	# can not relieve dead cells
 	# alive cells can not be dead
 	bnez a3, alive_bit
-	j noalive_bit
+	j not_alive_bit
 	
 	rule_2_5:	
 	li t0, 5
 	bne a4, t0, alive_bit	# if not 5 it is alive
-	j noalive_bit
+	j not_alive_bit
 	
 	back_rule_2:
 	lw t0, 0(sp)
@@ -171,7 +171,7 @@ rule_2:
 	ret
 
 
-# labyrinth
+# copy
 rule_3:
 # a1 x pos of cell
 # a2 y pos of cell
@@ -188,7 +188,7 @@ rule_3:
 	li t0, 2	# when a4%2=1 cell set alive else die
 	remu t0, a4, t0
 	bnez t0, alive_bit	# cell is to set alive or stay alive
-	j noalive_bit
+	j not_alive_bit
 	# the cell is dead
 		
 	back_rule_3:
@@ -199,7 +199,7 @@ rule_3:
 
 
 
-# copy
+# exploding labyrint 
 rule_4:
 # a1 x pos of cell
 # a2 y pos of cell
@@ -217,16 +217,16 @@ rule_4:
 	beq a4, t0, alive_bit	# cell gets alive
 	
 	bnez a4, rule_4_6
-	j noalive_bit
+	j not_alive_bit
 	
 	rule_4_6:
 	li t0, 6
 	bltu a4, t0, rule_4_stay
-	j noalive_bit
+	j not_alive_bit
 	
 	rule_4_stay:
 	bnez a3, alive_bit
-	j noalive_bit
+	j not_alive_bit
 	
 	back_rule_4:
 	lw t0, 0(sp)
@@ -239,6 +239,6 @@ alive_bit:
 li a4, 1
 ret
 
-noalive_bit:
+not_alive_bit:
 li a4, 0
 ret
