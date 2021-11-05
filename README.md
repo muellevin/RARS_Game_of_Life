@@ -13,9 +13,8 @@ Levin Müller:    inf20124@lehre.dhbw-stuttgart.de
 
 ## Demo Video
 
-[![IMAGE ALT TEXT](http://img.youtube.com/vi/-h3eH4ubuno/0.jpg)](http://www.youtube.com/watch?v=-h3eH4ubuno "Video Title")
+[![IMAGE ALT TEXT](https://i9.ytimg.com/vi/CIyV3eAVNKc/mq2.jpg?sqp=CIi4lYwG&rs=AOn4CLBbT-sRN4CsALVCblYSzKeqGRB4cg)](https://youtu.be/CIyV3eAVNKc "fpgrars/rars game of life")
 
-Replace -h3eH4ubuno in the this .md by your YT video
 
 ## Description
 
