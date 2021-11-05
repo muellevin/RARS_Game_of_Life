@@ -381,6 +381,12 @@ question_object:
 	
 	li t0, 2
 	beq a0, t0, smiley_object
+	
+	li t0, 3
+	beq a0, t0, r_pent_object
+	
+	li t0, 4
+	beq a0, t0, glider_gun_object
 
 	
 	glider_object:
@@ -391,7 +397,16 @@ question_object:
 	la a3, smiley			# load adress of object to print
 	j finished_question_object
 	
+	r_pent_object:
+	la a3, r_pent			# load adress of object to print
+	j finished_question_object
+	
+	glider_gun_object:
+	la a3, glider_gun			# load adress of object to print
+	j finished_question_object
+	
 	finished_question_object:
+	la a4, invalid_object		# in case the object is too huge
 	jal ra, question_object_pos	# returning pos on a1;a2 # not using a3 there so i do not need to save it
 	jal ra, draw_object
 	#resetting t0|ra
@@ -410,6 +425,7 @@ question_object:
 
 question_object_pos:
 # input a3 adress of object
+# input a4 with return adress if object is too huge
 	addi sp, sp, -28
 	sw s0, 0(sp)
 	sw s1, 4(sp)
@@ -428,16 +444,25 @@ question_object_pos:
 	
 	la s0, settings			# i need gamefield size and cell size
 	lw s1, 0(s0)			# cell size
-	lw t3, 12(s0)			# widht
 	
+
+	lw t3, 16(s0)			# height
+	sub t3, t3, s1			# last row|right edge cell
+	div t3, t3, s1			# max cells before edge
+	sub t3, t3, t1			# object cell height
+	bltz t3, invalid_object_size	# in case object is too huge
+	
+	lw t3, 12(s0)			# widht
+	sub t3, t3, s1			# last row|right edge cell
+	div t3, t3, s1			# max cells before edge
+	sub t3, t3, t0			# input cells
+	bltz t3, invalid_object_size	# in case object is too huge
 	
 	la a0, ask_object_x_pos	
 	li a7, 4
 	ecall
 	
-	sub t3, t3, s1			# last row|right edge cell
-	div t3, t3, s1			# max cells before edge
-	sub t3, t3, t0			# input cells
+	
 	mv a0, t3
 	jal ra, print
 	jal ra, print_new_line
@@ -497,6 +522,17 @@ question_object_pos:
 	lw ra, 24(sp)
 	addi sp, sp, 28
 	j invalid_input
+	
+	invalid_object_size:
+	lw s0, 0(sp)
+	lw s1, 4(sp)
+	lw t0, 8(sp)
+	lw t1, 12(sp)
+	lw t2, 16(sp)
+	lw t3, 20(sp)
+	lw ra, 24(sp)
+	addi sp, sp, 28
+	jr a4
 
 
 invalid_input:

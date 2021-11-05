@@ -25,8 +25,6 @@ state_bits:
 
 .eqv MAX_RULE 4		# min rule 1
 
-.eqv MAX_OBJECT 2	# min is 1
-
 .eqv MAX_TIME_DELAY 100000	# min is obviosly 0
 
 #.eqv ALIVE 0xa0a397 
@@ -87,15 +85,6 @@ settings:
 
 .word 0xa0a397	# color of living cells				# adress by 32
 
-glider:
-.word 0x00030003	# 16BIt height| 16 bit widht
-.word 0x35800000	# expression of glider status 001|101|011 -> 3x3 cells needed
-
-smiley:
-.word 0x00080009
-.word 0x3E20A530
-.word 0x1A2CE504
-.word 0x7c000000
-
-
 .text
+
+.include "objects.asm"
